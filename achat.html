@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <title>Simuler un achat en ligne</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <header>
+    <h1>Simuler un achat en ligne</h1>
+    <p>Étape 1 : choisir des articles et les ajouter au panier.</p>
+  </header>
+
+  <div class="home-button-container">
+    <a href="index.html" class="home-btn">🏠 Retour à l'accueil</a>
+  </div>
+
+  <main>
+    <section class="intro">
+      <h2>Étapes</h2>
+      <ol>
+        <li>Choisir un ou plusieurs articles.</li>
+        <li>Cliquer sur <strong>“Ajouter au panier”</strong>.</li>
+        <li>Cliquer sur <strong>“Voir mon panier”</strong> pour passer à l'étape suivante.</li>
+      </ol>
+      <p><strong>Tout est faux, rien n'est réellement commandé.</strong></p>
+
+      <div id="panier-resume" style="margin-top: 15px; font-size: 1.1rem;">
+        🛒 Panier : <strong><span id="panier-count">0</span> article(s)</strong>
+      </div>
+
+      <p style="margin-top: 10px;">
+        <a href="panier.html" class="home-btn" style="font-size:1rem; padding:10px 18px;">
+          Voir mon panier ➜
+        </a>
+      </p>
+    </section>
+
+    <section class="modules">
+      <h2>Petite boutique d'exemple</h2>
+
+      <div class="product-list">
+        <article class="product-card">
+          <img src="mug.png" alt="Mug">
+          <h3>Mug</h3>
+          <p><strong>8,00 €</strong></p>
+          <button type="button"
+                  onclick="ajouterAuPanier('Mug', 8)">
+            Ajouter au panier
+          </button>
+        </article>
+
+        <article class="product-card">
+          <img src="echarpe.jpg" alt="Écharpe">
+          <h3>Écharpe</h3>
+          <p><strong>20,00 €</strong></p>
+          <button type="button"
+                  onclick="ajouterAuPanier('Écharpe', 20)">
+            Ajouter au panier
+          </button>
+        </article>
+
+        <article class="product-card">
+          <img src="agenda.jpg" alt="Agenda">
+          <h3>Agenda</h3>
+          <p><strong>10,00 €</strong></p>
+          <button type="button"
+                  onclick="ajouterAuPanier('Agenda', 10)">
+            Ajouter au panier
+          </button>
+        </article>
+      </div>
+    </section>
+  </main>
+
+  <footer>
+    <p>Exercice pédagogique – aucune donnée réelle n'est enregistrée.</p>
+  </footer>
+
+  <script>
+    const CLE_PANIER = 'panier_exercice';
+
+    function lirePanier() {
+      try {
+        const data = localStorage.getItem(CLE_PANIER);
+        return data ? JSON.parse(data) : [];
+      } catch (e) {
+        return [];
+      }
+    }
+
+    function sauvegarderPanier(panier) {
+      localStorage.setItem(CLE_PANIER, JSON.stringify(panier));
+    }
+
+    function majAffichagePanier() {
+      const panier = lirePanier();
+      const countSpan = document.getElementById('panier-count');
+      if (countSpan) {
+        countSpan.textContent = panier.length;
+      }
+    }
+
+    function ajouterAuPanier(nom, prix) {
+      const panier = lirePanier();
+      panier.push({ nom, prix });
+      sauvegarderPanier(panier);
+      majAffichagePanier();
+    }
+
+    window.addEventListener('load', majAffichagePanier);
+  </script>
+</body>
+</html>
