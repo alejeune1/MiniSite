@@ -158,6 +158,7 @@ main {
   color: var(--blue-dark);
 }
 
+/* Carte explicative (paiement, etc.) */
 .fake-card {
   background: var(--blue-light);
   padding: 12px;
@@ -166,12 +167,13 @@ main {
 }
 
 /* ===========================
-   Formulaires / boutons
+   Formulaires / champs
    =========================== */
 input[type="text"],
 input[type="email"],
 input[type="password"],
 input[type="month"],
+input[type="date"],
 select,
 textarea {
   width: 100%;
@@ -187,6 +189,7 @@ textarea {
   resize: vertical;
 }
 
+/* Boutons */
 button[type="submit"],
 button {
   padding: 12px 22px;
@@ -204,31 +207,42 @@ button:hover {
 }
 
 /* ===========================
-   Boutons de navigation
+   Messages de feedback
    =========================== */
-.nav-buttons {
-  margin: 20px 0;
-  display: flex;
-  gap: 10px;
-  flex-wrap: wrap;
-}
-
-.nav-btn {
-  padding: 12px 20px;
-  background: var(--blue);
-  color: white;
-  border-radius: 8px;
-  font-size: 1rem;
-  font-weight: bold;
-  border: none;
-  cursor: pointer;
+.success-message {
+  margin-top: 20px;
+  padding: 20px;
+  border-radius: 10px;
+  background: #e8f9e8;
+  border: 2px solid #3c9a3c;
   text-align: center;
-  display: inline-block;
-  text-decoration: none;
+  font-size: 1.15rem;
 }
 
-.nav-btn:hover {
-  background: var(--blue-dark);
+.success-message .check {
+  font-size: 2.4rem;
+  display: block;
+  margin-bottom: 5px;
+}
+
+.error-message {
+  margin-top: 20px;
+  padding: 20px;
+  border-radius: 10px;
+  background: #fdeaea;
+  border: 2px solid #cc3030;
+  text-align: center;
+  font-size: 1.05rem;
+}
+
+.error-message .cross {
+  font-size: 2rem;
+  display: block;
+  margin-bottom: 5px;
+}
+
+.hidden {
+  display: none;
 }
 
 /* ===========================
@@ -258,42 +272,57 @@ button:hover {
 }
 
 /* ===========================
-   Message de validation
+   Champs mot de passe + œil
    =========================== */
-.success-message {
-  margin-top: 20px;
-  padding: 20px;
-  border-radius: 10px;
-  background: #e8f9e8;
-  border: 2px solid #3c9a3c;
-  text-align: center;
-  font-size: 1.15rem;
+.password-wrapper {
+  position: relative;
+  display: inline-block;
+  width: 100%;
+  max-width: 450px;
 }
 
-.success-message .check {
-  font-size: 2.4rem;
+.password-wrapper input[type="password"],
+.password-wrapper input[type="text"] {
+  width: 100%;
+  padding-right: 40px; /* place pour l'icône œil */
+}
+
+.password-eye {
+  position: absolute;
+  right: 10px;
+  top: 50%;
+  transform: translateY(-50%);
+  cursor: pointer;
+  width: 22px;
+  height: 22px;
+  opacity: 0.6;
+  user-select: none;
+}
+
+.password-eye:hover {
+  opacity: 1;
+}
+
+/* Icône œil (ouvert) */
+.password-eye.open::before {
+  content: "";
   display: block;
-  margin-bottom: 5px;
+  width: 100%;
+  height: 100%;
+  background-size: cover;
+  background-image: url("data:image/svg+xml;utf8,\
+<svg xmlns='http://www.w3.org/2000/svg' fill='%23666' viewBox='0 0 24 24'><path d='M12 4.5C7 4.5 2.73 7.61 1 12c1.73 4.39 6 7.5 11 7.5s9.27-3.11 11-7.5c-1.73-4.39-6-7.5-11-7.5zm0 13c-3 0-5.5-2.46-5.5-5.5S9 6.5 12 6.5s5.5 2.46 5.5 5.5-2.5 5.5-5.5 5.5zm0-9c-1.93 0-3.5 1.57-3.5 3.5S10.07 15.5 12 15.5 15.5 13.93 15.5 12 13.93 8.5 12 8.5z'/></svg>");
 }
 
-.hidden {
-  display: none;
-}
-
-.error-message {
-  margin-top: 20px;
-  padding: 20px;
-  border-radius: 10px;
-  background: #fdeaea;
-  border: 2px solid #cc3030;
-  text-align: center;
-  font-size: 1.05rem;
-}
-
-.error-message .cross {
-  font-size: 2rem;
+/* Icône œil barré (fermé) */
+.password-eye.closed::before {
+  content: "";
   display: block;
-  margin-bottom: 5px;
+  width: 100%;
+  height: 100%;
+  background-size: cover;
+  background-image: url("data:image/svg+xml;utf8,\
+<svg xmlns='http://www.w3.org/2000/svg' fill='%23666' viewBox='0 0 24 24'><path d='M12 6.5c3 0 5.5 2.46 5.5 5.5 0 .78-.16 1.53-.45 2.21l3.17 3.17-.71.71-3.07-3.07c-.91.88-2.11 1.43-3.44 1.43-3 0-5.5-2.46-5.5-5.5 0-1.33.55-2.53 1.43-3.44L6.39 6.39l.71-.71 3.17 3.17c.68-.29 1.43-.45 2.21-.45zm0-2c5 0 9.27 3.11 11 7.5-.73 1.84-1.89 3.44-3.33 4.72l-.71-.71c1.28-1.14 2.29-2.57 2.93-4.01C20.73 8.61 16 5.5 12 5.5c-1.71 0-3.33.41-4.77 1.12l-.76-.76C8.12 5.69 10 5 12 5z'/></svg>");
 }
 
 /* ===========================

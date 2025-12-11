@@ -34,20 +34,43 @@
     <section class="modules">
       <h2>Étape paiement (factice)</h2>
 
-      <p><strong>Rappel :</strong> On s'exerce seulement. Rien n'est payé.</p>
-
-      <p class="fake-card">
-        💳 Carte déjà enregistrée pour l'exercice<br>
-        Numéro : **** **** **** 1234<br>
-        Nom : <strong>Jean Exemple</strong><br>
-        Expiration : <strong>12/28</strong>
-      </p>
+      <p><strong>Important :</strong> ne renseignez jamais vos vrais numéros de carte bancaire sur ce site d'exercice.</p>
 
       <form onsubmit="validerAchatFaux(event)">
         <p>
-          <label>
-            <input type="checkbox" required>
-            J'utilise cette carte factice pour l'exercice.
+          <label>Numéro de carte :<br>
+            <input type="text"
+                   name="carte"
+                   placeholder="1234 5678 9012 3456"
+                   maxlength="19"
+                   required>
+          </label>
+        </p>
+
+        <p>
+          <label>Nom du titulaire :<br>
+            <input type="text"
+                   name="titulaire"
+                   placeholder="Jean Exemple"
+                   required>
+          </label>
+        </p>
+
+        <p>
+          <label>Date d'expiration :<br>
+            <input type="month"
+                   name="expiration"
+                   required>
+          </label>
+        </p>
+
+        <p>
+          <label>Cryptogramme  :<br>
+            <input type="password"
+                   name="crypto"
+                   maxlength="3"
+                   placeholder="123"
+                   required>
           </label>
         </p>
 
