@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <title>Mon panier (exercice)</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <header>
+    <h1>Mon panier</h1>
+    <p>Étape 2 : vérifier les articles, puis valider un faux paiement.</p>
+  </header>
+
+  <div class="home-button-container">
+    <a href="index.html" class="home-btn">🏠 Retour à l'accueil</a>
+  </div>
+
+  <main>
+    <section class="intro">
+      <h2>Récapitulatif du panier</h2>
+      <p>Voici les articles que vous avez ajoutés dans la boutique d'exemple.</p>
+
+      <div id="panier-contenu">
+        <!-- Liste des articles générée en JavaScript -->
+      </div>
+
+      <p id="panier-total" style="font-size: 1.1rem; margin-top: 10px;"></p>
+
+      <p style="margin-top: 10px;">
+        <a href="achat.html">⬅ Retourner à la boutique</a>
+      </p>
+    </section>
+
+    <section class="modules">
+      <h2>Étape paiement (factice)</h2>
+
+      <p><strong>Rappel :</strong> On s'exerce seulement. Rien n'est payé.</p>
+
+      <p class="fake-card">
+        💳 Carte déjà enregistrée pour l'exercice<br>
+        Numéro : **** **** **** 1234<br>
+        Nom : <strong>Jean Exemple</strong><br>
+        Expiration : <strong>12/28</strong>
+      </p>
+
+      <form onsubmit="validerAchatFaux(event)">
+        <p>
+          <label>
+            <input type="checkbox" required>
+            J'utilise cette carte factice pour l'exercice.
+          </label>
+        </p>
+
+        <p>
+          <button type="submit">Valider le faux achat</button>
+        </p>
+      </form>
+
+      <div id="success-message" class="success-message hidden">
+        <span class="check">✔</span>
+        <p><strong>Achat simulé avec succès !</strong></p>
+        <p>Aucune information réelle n'a été envoyée, et le panier a été vidé.</p>
+      </div>
+    </section>
+  </main>
+
+  <footer>
+    <p>Exercice pédagogique – aucune donnée réelle n'est enregistrée.</p>
+  </footer>
+
+  <script>
+    const CLE_PANIER = 'panier_exercice';
+
+    function lirePanier() {
+      try {
+        const data = localStorage.getItem(CLE_PANIER);
+        return data ? JSON.parse(data) : [];
+      } catch (e) {
+        return [];
+      }
+    }
+
+    function viderPanier() {
+      localStorage.removeItem(CLE_PANIER);
+    }
+
+    function afficherPanier() {
+      const panier = lirePanier();
+      const container = document.getElementById('panier-contenu');
+      const totalElt = document.getElementById('panier-total');
+
+      if (!panier.length) {
+        container.innerHTML = "<p>Votre panier est vide. Retournez à la boutique pour ajouter des articles.</p>";
+        totalElt.textContent = "";
+        return;
+      }
+
+      const liste = document.createElement('ul');
+      liste.style.listStyle = 'none';
+      liste.style.padding = '0';
+
+      let total = 0;
+
+      panier.forEach(item => {
+        total += item.prix;
+        const li = document.createElement('li');
+        li.style.marginBottom = '6px';
+        li.textContent = `${item.nom} – ${item.prix.toFixed(2)} €`;
+        liste.appendChild(li);
+      });
+
+      container.innerHTML = "";
+      container.appendChild(liste);
+
+      totalElt.textContent = `Total : ${total.toFixed(2)} € (factice)`;
+    }
+
+    function validerAchatFaux(event) {
+      event.preventDefault();
+      viderPanier();
+      afficherPanier(); // met à jour l'affichage (panier vide)
+      const box = document.getElementById('success-message');
+      box.classList.remove('hidden');
+      box.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    }
+
+    window.addEventListener('load', afficherPanier);
+  </script>
+</body>
+</html>
