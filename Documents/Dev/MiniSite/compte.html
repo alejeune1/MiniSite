@@ -1,0 +1,214 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <title>Créer un compte et se connecter</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <header>
+    <h1>Créer un compte et se connecter</h1>
+    <p>Exercice : créer un faux compte, puis s'entraîner à se connecter.</p>
+  </header>
+
+  <div class="home-button-container">
+    <a href="index.html" class="home-btn">🏠 Retour à l'accueil</a>
+  </div>
+
+  <main>
+    <!-- Étapes -->
+    <section class="intro">
+      <h2>Étapes</h2>
+      <ol>
+        <li>Remplir le formulaire “Créer un compte” et valider.</li>
+        <li>Descendre à la partie “Se connecter”.</li>
+        <li>Entrer le même email et le même mot de passe.</li>
+        <li>Cliquer sur <strong>“Se connecter”</strong>.</li>
+      </ol>
+      <p><strong>Tout est stocké uniquement sur cet ordinateur, pour l'exercice.</strong></p>
+    </section>
+
+    <!-- Création de compte -->
+    <section class="modules">
+      <h2>Créer un compte (faux)</h2>
+
+      <form onsubmit="creerCompte(event)">
+        <p>
+          <label>Nom :<br>
+            <input type="text" name="nom" id="crea-nom" required>
+          </label>
+        </p>
+
+        <p>
+          <label>Adresse email :<br>
+            <input type="email" name="email" id="crea-email" required>
+          </label>
+        </p>
+
+        <p>
+          <label>Mot de passe :<br>
+            <div class="password-wrapper">
+              <input type="password" name="motdepasse" id="crea-mdp" required>
+              <span id="eye-crea-mdp"
+                    class="password-eye open"
+                    onclick="togglePassword('crea-mdp','eye-crea-mdp')"></span>
+            </div>
+          </label>
+        </p>
+
+        <p>
+          <label>Confirmer le mot de passe :<br>
+            <div class="password-wrapper">
+              <input type="password" id="crea-mdp-confirm" required>
+              <span id="eye-crea-mdp2"
+                    class="password-eye open"
+                    onclick="togglePassword('crea-mdp-confirm','eye-crea-mdp2')"></span>
+            </div>
+          </label>
+        </p>
+
+        <p>
+          <button type="submit">Créer le faux compte</button>
+        </p>
+      </form>
+
+      <div id="crea-success" class="success-message hidden">
+        <span class="check">✔</span>
+        <p><strong>Compte créé pour l'exercice !</strong></p>
+        <p>Vous pouvez maintenant tester la connexion ci-dessous.</p>
+      </div>
+
+      <div id="crea-error" class="error-message hidden">
+        <span class="cross">✖</span>
+        <p><strong>Les deux mots de passe ne sont pas identiques.</strong></p>
+        <p>Veuillez recommencer.</p>
+      </div>
+    </section>
+
+    <!-- Connexion -->
+    <section class="modules">
+      <h2>Se connecter (faux)</h2>
+
+      <form onsubmit="seConnecter(event)">
+        <p>
+          <label>Adresse email :<br>
+            <input type="email" id="login-email" required>
+          </label>
+        </p>
+
+        <p>
+          <label>Mot de passe :<br>
+            <div class="password-wrapper">
+              <input type="password" id="login-mdp" required>
+              <span id="eye-login-mdp"
+                    class="password-eye open"
+                    onclick="togglePassword('login-mdp','eye-login-mdp')"></span>
+            </div>
+          </label>
+        </p>
+
+        <p>
+          <button type="submit">Se connecter</button>
+        </p>
+      </form>
+
+      <div id="login-success" class="success-message hidden">
+        <span class="check">✔</span>
+        <p><strong>Connexion réussie (exercice) !</strong></p>
+        <p>Vous avez utilisé le bon email et le bon mot de passe.</p>
+      </div>
+
+      <div id="login-error" class="error-message hidden">
+        <span class="cross">✖</span>
+        <p><strong>Connexion impossible.</strong></p>
+        <p>Email ou mot de passe incorrect, ou aucun compte n'a été créé.</p>
+      </div>
+    </section>
+  </main>
+
+  <footer>
+    <p>Exercice pédagogique – aucune donnée réelle n'est envoyée.</p>
+  </footer>
+
+  <script>
+    const CLE_COMPTE = 'compte_exercice';
+
+    function creerCompte(event) {
+      event.preventDefault();
+
+      const nom = document.getElementById('crea-nom').value.trim();
+      const email = document.getElementById('crea-email').value.trim();
+      const mdp = document.getElementById('crea-mdp').value;
+      const mdpConfirm = document.getElementById('crea-mdp-confirm').value;
+
+      const successBox = document.getElementById('crea-success');
+      const errorBox = document.getElementById('crea-error');
+
+      successBox.classList.add('hidden');
+      errorBox.classList.add('hidden');
+
+      if (mdp !== mdpConfirm) {
+        errorBox.classList.remove('hidden');
+        errorBox.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        return;
+      }
+
+      const compte = { nom, email, mdp };
+
+      try {
+        localStorage.setItem(CLE_COMPTE, JSON.stringify(compte));
+      } catch (e) {
+        // si localStorage désactivé, on ignore (exercice uniquement)
+      }
+
+      successBox.classList.remove('hidden');
+      successBox.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    }
+
+    function seConnecter(event) {
+      event.preventDefault();
+
+      const email = document.getElementById('login-email').value.trim();
+      const mdp = document.getElementById('login-mdp').value;
+
+      const successBox = document.getElementById('login-success');
+      const errorBox = document.getElementById('login-error');
+
+      successBox.classList.add('hidden');
+      errorBox.classList.add('hidden');
+
+      let compte = null;
+      try {
+        const data = localStorage.getItem(CLE_COMPTE);
+        compte = data ? JSON.parse(data) : null;
+      } catch (e) {
+        compte = null;
+      }
+
+      if (!compte || compte.email !== email || compte.mdp !== mdp) {
+        errorBox.classList.remove('hidden');
+        errorBox.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        return;
+      }
+
+      successBox.classList.remove('hidden');
+      successBox.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    }
+
+    function togglePassword(id, eyeId) {
+      const input = document.getElementById(id);
+      const eye = document.getElementById(eyeId);
+
+      if (input.type === "password") {
+        input.type = "text";
+        eye.classList.remove("open");
+        eye.classList.add("closed");
+      } else {
+        input.type = "password";
+        eye.classList.remove("closed");
+        eye.classList.add("open");
+      }
+    }
+  </script>
+</body>
+</html>

@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <title>Prendre un rendez-vous en ligne</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <header>
+    <h1>Prendre un rendez-vous en ligne</h1>
+    <p>Exercice : choisir un type de rendez-vous, une date et une heure.</p>
+  </header>
+
+  <div class="home-button-container">
+    <a href="index.html" class="home-btn">🏠 Retour à l'accueil</a>
+  </div>
+
+  <main>
+    <section class="intro">
+      <h2>Étapes</h2>
+      <ol>
+        <li>Choisir le type de rendez-vous.</li>
+        <li>Entrer votre nom.</li>
+        <li>Choisir une date et une heure.</li>
+        <li>Cliquer sur <strong>“Valider le rendez-vous (faux)”</strong>.</li>
+      </ol>
+      <p><strong>Ceci est un exercice : aucun vrai rendez-vous n'est pris.</strong></p>
+    </section>
+
+    <section class="modules">
+      <h2>Formulaire de rendez-vous (faux)</h2>
+
+      <form onsubmit="validerRdv(event)">
+        <p>
+          <label>Type de rendez-vous :<br>
+            <select id="type-rdv" required>
+              <option value="">-- Choisir --</option>
+              <option>Médecin généraliste</option>
+              <option>Ophtalmologue</option>
+              <option>Kinésithérapeute</option>
+              <option>Administration (carte d'identité / passeport)</option>
+            </select>
+          </label>
+        </p>
+
+        <p>
+          <label>Votre nom :<br>
+            <input type="text" id="nom-rdv" required>
+          </label>
+        </p>
+
+        <p>
+          <label>Date du rendez-vous :<br>
+            <input type="date" id="date-rdv" required>
+          </label>
+        </p>
+
+        <p>
+          <label>Heure du rendez-vous :<br>
+            <select id="heure-rdv" required>
+              <option value="">-- Choisir --</option>
+              <option>09:00</option>
+              <option>10:00</option>
+              <option>11:00</option>
+              <option>14:00</option>
+              <option>15:00</option>
+              <option>16:00</option>
+            </select>
+          </label>
+        </p>
+
+        <p>
+          <label>Mode :<br>
+            <select id="mode-rdv" required>
+              <option>Sur place au cabinet</option>
+              <option>En visio (en ligne)</option>
+            </select>
+          </label>
+        </p>
+
+        <p>
+          <button type="submit">Valider le rendez-vous (faux)</button>
+        </p>
+      </form>
+
+      <!-- Récap + message de succès -->
+      <div id="rdv-resultat" class="success-message hidden">
+        <span class="check">✔</span>
+        <p><strong>Rendez-vous simulé avec succès !</strong></p>
+        <p id="rdv-recap"></p>
+        <p>Aucun rendez-vous réel n'a été pris.</p>
+      </div>
+    </section>
+  </main>
+
+  <footer>
+    <p>Exercice pédagogique – aucune donnée réelle n'est envoyée.</p>
+  </footer>
+
+  <script>
+    function formaterDateFr(iso) {
+      if (!iso) return '';
+      const [year, month, day] = iso.split('-');
+      return `${day}/${month}/${year}`;
+    }
+
+    function validerRdv(event) {
+      event.preventDefault();
+
+      const type = document.getElementById('type-rdv').value;
+      const nom = document.getElementById('nom-rdv').value.trim();
+      const date = document.getElementById('date-rdv').value;
+      const heure = document.getElementById('heure-rdv').value;
+      const mode = document.getElementById('mode-rdv').value;
+
+      const box = document.getElementById('rdv-resultat');
+      const recap = document.getElementById('rdv-recap');
+
+      if (!type || !nom || !date || !heure || !mode) {
+        // Normalement géré par "required", mais on sécurise
+        return;
+      }
+
+      const dateFr = formaterDateFr(date);
+
+      recap.textContent = `Vous avez pris un rendez-vous “${type}” pour ${nom}, le ${dateFr} à ${heure}, (${mode}).`;
+
+      box.classList.remove('hidden');
+      box.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    }
+  </script>
+</body>
+</html>

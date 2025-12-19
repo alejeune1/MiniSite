@@ -1,0 +1,212 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <title>Trouver un service selon un besoin</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <header>
+    <h1>Trouver un service selon un besoin</h1>
+    <p>Choisissez un besoin courant et découvrez des services adaptés.</p>
+  </header>
+
+  <div class="home-button-container">
+    <a href="index.html" class="home-btn">🏠 Retour à l'accueil</a>
+  </div>
+
+  <main>
+    <section class="needs-helper">
+      <h2>Que souhaitez-vous faire&nbsp;?</h2>
+      <p>Choisissez un besoin, puis explorez quelques pistes simples pour y répondre.</p>
+
+      <label for="need-select"><strong>Votre besoin</strong></label>
+      <select id="need-select" aria-label="Choix du besoin">
+        <option value="mail">Boîte mail</option>
+        <option value="storage">Stocker/partager des fichiers</option>
+        <option value="video">Visioconférence</option>
+        <option value="servicepublic">Service Public</option>
+      </select>
+
+      <div id="solutions" class="solution-grid" aria-live="polite"></div>
+    </section>
+  </main>
+
+  <footer>
+    <p>Atelier pédagogique – aucune information n'est réellement envoyée.</p>
+  </footer>
+
+  <script>
+    const solutionsParBesoin = {
+      mail: {
+        description: "Envoyer et recevoir des messages.",
+        items: [
+          {
+            nom: "Gmail",
+            details: "Boîte mail gratuite avec recherche puissante.",
+            url: "https://mail.google.com",
+            image: "/gmail.png"
+          },
+          {
+            nom: "Orange Mail",
+            details: "Interface simple et en français.",
+            url: "https://mail.orange.fr",
+            image: "/orangeMail.png"
+          },
+          {
+            nom: "Laposte.net",
+            details: "Adresse @laposte.net avec 5 Go gratuits.",
+            url: "https://www.laposte.net",
+            image: "/LaposteMail.webp"
+          }
+        ]
+      },
+
+      storage: {
+        description: "Sauvegarder et partager vos documents.",
+        items: [
+          {
+            nom: "Google Drive",
+            details: "Sauvegarde dans le cloud avec partage facile.",
+            url: "https://drive.google.com",
+            image: "/googleDrive.jfif"
+          },
+          {
+            nom: "Dropbox",
+            details: "Synchronisation de fichiers multi-appareils.",
+            url: "https://www.dropbox.com",
+            image: "/dropbox.jpeg"
+          }
+        ]
+      },
+
+      video: {
+        description: "Discuter en vidéo avec une ou plusieurs personnes.",
+        items: [
+          {
+            nom: "Zoom",
+            details: "Pour des réunions en ligne avec partage d'écran.",
+            url: "https://zoom.us",
+            image: "/zoom.png"
+          },
+          {
+            nom: "Microsoft Teams",
+            details: "Réunions, chat et partage de documents.",
+            url: "https://teams.microsoft.com",
+            image: "/teams.webp"
+          },
+          {
+            nom: "Google Meet",
+            details: "Visio simple depuis un navigateur (souvent via Gmail).",
+            url: "https://meet.google.com",
+            image: "/meet.png"
+          }
+        ]
+      },
+
+      servicepublic: {
+        description: "Faire des démarches administratives et santé en ligne.",
+        items: [
+          {
+            nom: "ameli (Assurance Maladie)",
+            details: "Remboursements, attestations, démarches santé.",
+            url: "https://www.ameli.fr/",
+            image: "/logoAmeli.png"
+          },
+          {
+            nom: "impots.gouv.fr",
+            details: "Déclarer ses revenus, payer ses impôts, consulter ses avis.",
+            url: "https://www.impots.gouv.fr/accueil",
+            image: "/impotsGouv.png"
+          },
+          {
+            nom: "CAF (caf.fr)",
+            details: "Aides, démarches en ligne et suivi de dossier.",
+            url: "https://www.caf.fr/",
+            image: "/caf.gif"
+          },
+          {
+            nom: "Doctolib",
+            details: "Prendre un rendez-vous médical en ligne.",
+            url: "https://www.doctolib.fr/",
+            image: "/doctolib.svg"
+          },
+          {
+            nom: "Service-Public.fr",
+            details: "Informations officielles et démarches (papiers, logement…).",
+            url: "https://www.service-public.fr/",
+            image: "/servicePublic.jpg"
+          }
+        ]
+      }
+    };
+
+    function creerCarte(solution) {
+      const card = document.createElement('article');
+      card.className = 'solution-card';
+
+      const img = document.createElement('img');
+      img.src = solution.image;
+      img.alt = `Illustration pour ${solution.nom}`;
+
+      const title = document.createElement('h3');
+      title.textContent = solution.nom;
+
+      const desc = document.createElement('p');
+      desc.textContent = solution.details;
+
+      const link = document.createElement('a');
+      link.href = solution.url;
+      link.target = '_blank';
+      link.rel = 'noopener noreferrer';
+      link.className = 'solution-link';
+      link.textContent = 'Ouvrir le site';
+
+      card.appendChild(img);
+      card.appendChild(title);
+      card.appendChild(desc);
+      card.appendChild(link);
+      return card;
+    }
+
+    function afficherSolutions(codeBesoin) {
+      const zone = document.getElementById('solutions');
+      const besoin = solutionsParBesoin[codeBesoin];
+
+      if (!zone || !besoin) return;
+
+      zone.innerHTML = '';
+
+      const intro = document.createElement('p');
+      intro.className = 'solution-hint';
+      intro.textContent = besoin.description;
+      zone.appendChild(intro);
+
+      // Si vide, on affiche un message clair (évite “page blanche”)
+      if (!besoin.items || besoin.items.length === 0) {
+        const empty = document.createElement('p');
+        empty.textContent = "Aucune suggestion pour l'instant.";
+        zone.appendChild(empty);
+        return;
+      }
+
+      const grille = document.createElement('div');
+      grille.className = 'solution-cards';
+
+      besoin.items.forEach(item => {
+        grille.appendChild(creerCarte(item));
+      });
+
+      zone.appendChild(grille);
+    }
+
+    const selectBesoin = document.getElementById('need-select');
+    if (selectBesoin) {
+      selectBesoin.addEventListener('change', (event) => {
+        afficherSolutions(event.target.value);
+      });
+      afficherSolutions(selectBesoin.value);
+    }
+  </script>
+</body>
+</html>
