@@ -80,6 +80,10 @@
   <script>
     const CLE_PANIER = 'panier_exercice';
 
+    function reinitialiserPanier() {
+      localStorage.removeItem(CLE_PANIER);
+    }
+
     function lirePanier() {
       try {
         const data = localStorage.getItem(CLE_PANIER);
@@ -108,7 +112,10 @@
       majAffichagePanier();
     }
 
-    window.addEventListener('load', majAffichagePanier);
+    window.addEventListener('load', () => {
+      reinitialiserPanier();
+      majAffichagePanier();
+    });
   </script>
 </body>
 </html>
