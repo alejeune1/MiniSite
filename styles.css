@@ -88,6 +88,84 @@ main {
   font-size: 1.05rem;
 }
 
+.needs-helper {
+  background: #ffffff;
+  padding: 20px;
+  border-radius: 10px;
+  border: 1px solid var(--border);
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
+}
+
+.needs-helper h2 {
+  margin-top: 0;
+  color: var(--blue-dark);
+}
+
+.needs-helper p {
+  line-height: 1.5;
+  font-size: 1.05rem;
+}
+
+.needs-helper label {
+  display: block;
+  margin: 14px 0 6px;
+}
+
+.solution-grid {
+  margin-top: 16px;
+}
+
+.solution-hint {
+  margin: 0 0 10px 0;
+  font-weight: 600;
+  color: var(--blue-dark);
+}
+
+.solution-cards {
+  display: grid;
+  gap: 14px;
+}
+
+@media (min-width: 700px) {
+  .solution-cards {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+
+.solution-card {
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 12px;
+  background: #fff;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.04);
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.solution-card img {
+  width: 100%;
+  height: auto;
+  border-radius: 8px;
+  object-fit: cover;
+}
+
+.solution-card h3 {
+  margin: 4px 0;
+  color: var(--blue-dark);
+}
+
+.solution-card p {
+  margin: 0;
+  line-height: 1.4;
+  flex: 1;
+}
+
+.solution-link {
+  align-self: flex-start;
+  font-weight: bold;
+}
+
 /* ===========================
    Liste de modules (accueil)
    =========================== */
