@@ -25,6 +25,7 @@
         <option value="mail">Boîte mail</option>
         <option value="storage">Stocker/partager des fichiers</option>
         <option value="video">Visioconférence</option>
+        <option value="servicepublic">Service Public</option>
       </select>
 
       <div id="solutions" class="solution-grid" aria-live="polite"></div>
@@ -44,22 +45,23 @@
             nom: "Gmail",
             details: "Boîte mail gratuite avec recherche puissante.",
             url: "https://mail.google.com",
-            image: "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='200' height='140' viewBox='0 0 200 140'><rect width='200' height='140' rx='16' fill='%23f6f6f6'/><path d='M40 40h120v60H40z' fill='%23fff' stroke='%23d14836' stroke-width='6' rx='12'/><path d='M40 42l60 44 60-44' fill='none' stroke='%23d14836' stroke-width='10' stroke-linejoin='round'/></svg>"
+            image: "/gmail.png"
           },
           {
             nom: "Orange Mail",
             details: "Interface simple et en français.",
             url: "https://mail.orange.fr",
-            image: "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='200' height='140' viewBox='0 0 200 140'><rect width='200' height='140' rx='16' fill='%23ff7a00'/><text x='50%' y='54%' fill='%23fff' font-size='42' font-family='Arial' text-anchor='middle'>O</text><text x='50%' y='78%' fill='%23fff' font-size='26' font-family='Arial' text-anchor='middle'>Mail</text></svg>"
+            image: "/orangeMail.png"
           },
           {
             nom: "Laposte.net",
             details: "Adresse @laposte.net avec 5 Go gratuits.",
             url: "https://www.laposte.net",
-            image: "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='200' height='140' viewBox='0 0 200 140'><rect width='200' height='140' rx='16' fill='%23ffd200'/><path d='M70 45h60l-10 18H80z' fill='%23003973'/><path d='M60 70h80l-12 24H72z' fill='%23003973'/></svg>"
+            image: "/LaposteMail.webp"
           }
         ]
       },
+
       storage: {
         description: "Sauvegarder et partager vos documents.",
         items: [
@@ -67,22 +69,17 @@
             nom: "Google Drive",
             details: "Sauvegarde dans le cloud avec partage facile.",
             url: "https://drive.google.com",
-            image: "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='200' height='140' viewBox='0 0 200 140'><rect width='200' height='140' rx='16' fill='%23eef6ff'/><path d='M80 35h40l25 44-20 36H85L60 79z' fill='%233296fa'/><path d='M80 35l-20 34 25 44 20-34z' fill='%234a89f5'/><path d='M120 35l25 44-20 36-25-44z' fill='%232f6de0'/></svg>"
+            image: "/googleDrive.jfif"
           },
           {
             nom: "Dropbox",
-            details: "Synchronisation de fichiers multi‑appareils.",
+            details: "Synchronisation de fichiers multi-appareils.",
             url: "https://www.dropbox.com",
-            image: "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='200' height='140' viewBox='0 0 200 140'><rect width='200' height='140' rx='16' fill='%23eef2ff'/><path d='M70 40l30 20-30 20-30-20zM130 40l30 20-30 20-30-20zM70 80l30 20-30 20-30-20zM130 80l30 20-30 20-30-20z' fill='%23006ee3'/><path d='M70 80l30-20 30 20-30 20z' fill='%23006ee3' opacity='0.75'/></svg>"
-          },
-          {
-            nom: "pCloud",
-            details: "Espace en ligne avec chiffrement optionnel.",
-            url: "https://www.pcloud.com",
-            image: "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='200' height='140' viewBox='0 0 200 140'><rect width='200' height='140' rx='16' fill='%23e6fbff'/><circle cx='100' cy='70' r='44' fill='%2300a5cf'/><path d='M86 68a14 14 0 1128 0v8h-28z' fill='%23fff'/><rect x='86' y='68' width='28' height='20' rx='6' fill='%2300a5cf'/></svg>"
+            image: "/dropbox.jpeg"
           }
         ]
       },
+
       video: {
         description: "Discuter en vidéo avec une ou plusieurs personnes.",
         items: [
@@ -90,19 +87,55 @@
             nom: "Zoom",
             details: "Pour des réunions en ligne avec partage d'écran.",
             url: "https://zoom.us",
-            image: "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='200' height='140' viewBox='0 0 200 140'><rect width='200' height='140' rx='16' fill='%23eaf4ff'/><rect x='44' y='44' width='86' height='52' rx='12' fill='%230077e0'/><polygon points='120,52 156,70 120,88' fill='%2346a3ff'/></svg>"
+            image: "/zoom.png"
           },
           {
             nom: "Microsoft Teams",
             details: "Réunions, chat et partage de documents.",
             url: "https://teams.microsoft.com",
-            image: "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='200' height='140' viewBox='0 0 200 140'><rect width='200' height='140' rx='16' fill='%23f1efff'/><rect x='64' y='40' width='72' height='60' rx='12' fill='%235b3bf1'/><rect x='82' y='50' width='36' height='40' rx='6' fill='%23f5f5ff'/><text x='100' y='78' fill='%235b3bf1' font-size='24' font-family='Arial' text-anchor='middle' font-weight='bold'>T</text></svg>"
+            image: "/teams.webp"
           },
           {
-            nom: "Jitsi Meet",
-            details: "Solution libre, aucune inscription obligatoire.",
-            url: "https://meet.jit.si",
-            image: "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='200' height='140' viewBox='0 0 200 140'><rect width='200' height='140' rx='16' fill='%23e6f6ff'/><circle cx='80' cy='70' r='26' fill='%230061a8'/><rect x='108' y='52' width='38' height='36' rx='10' fill='%230061a8'/><path d='M118 60l18-10v40l-18-10z' fill='%237ac8ff'/></svg>"
+            nom: "Google Meet",
+            details: "Visio simple depuis un navigateur (souvent via Gmail).",
+            url: "https://meet.google.com",
+            image: "/meet.png"
+          }
+        ]
+      },
+
+      servicepublic: {
+        description: "Faire des démarches administratives et santé en ligne.",
+        items: [
+          {
+            nom: "ameli (Assurance Maladie)",
+            details: "Remboursements, attestations, démarches santé.",
+            url: "https://www.ameli.fr/",
+            image: "/logoAmeli.png"
+          },
+          {
+            nom: "impots.gouv.fr",
+            details: "Déclarer ses revenus, payer ses impôts, consulter ses avis.",
+            url: "https://www.impots.gouv.fr/accueil",
+            image: "/impotsGouv.png"
+          },
+          {
+            nom: "CAF (caf.fr)",
+            details: "Aides, démarches en ligne et suivi de dossier.",
+            url: "https://www.caf.fr/",
+            image: "/caf.gif"
+          },
+          {
+            nom: "Doctolib",
+            details: "Prendre un rendez-vous médical en ligne.",
+            url: "https://www.doctolib.fr/",
+            image: "/doctolib.svg"
+          },
+          {
+            nom: "Service-Public.fr",
+            details: "Informations officielles et démarches (papiers, logement…).",
+            url: "https://www.service-public.fr/",
+            image: "/servicePublic.jpg"
           }
         ]
       }
@@ -148,6 +181,14 @@
       intro.className = 'solution-hint';
       intro.textContent = besoin.description;
       zone.appendChild(intro);
+
+      // Si vide, on affiche un message clair (évite “page blanche”)
+      if (!besoin.items || besoin.items.length === 0) {
+        const empty = document.createElement('p');
+        empty.textContent = "Aucune suggestion pour l'instant.";
+        zone.appendChild(empty);
+        return;
+      }
 
       const grille = document.createElement('div');
       grille.className = 'solution-cards';

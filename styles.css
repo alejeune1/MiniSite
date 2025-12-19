@@ -67,7 +67,8 @@ main {
 }
 
 .intro,
-.modules {
+.modules,
+.download-pack {
   background: #ffffff;
   padding: 20px;
   border-radius: 10px;
@@ -76,16 +77,39 @@ main {
 }
 
 .intro h2,
-.modules h2 {
+.modules h2,
+.download-pack h2 {
   margin-top: 0;
   color: var(--blue-dark);
 }
 
 .intro p,
 .modules p,
+.download-pack p,
 .intro ol {
   line-height: 1.5;
   font-size: 1.05rem;
+}
+
+.download-link {
+  display: inline-block;
+  margin-top: 8px;
+  padding: 12px 18px;
+  border-radius: 8px;
+  background: var(--blue);
+  color: #ffffff;
+  font-weight: 700;
+}
+
+.download-link:hover {
+  background: var(--blue-dark);
+  text-decoration: none;
+}
+
+.download-note {
+  margin-top: 10px;
+  font-size: 0.95rem;
+  color: #555555;
 }
 
 .needs-helper {
