@@ -1,0 +1,111 @@
+﻿<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <title>Cours</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <header>
+    <h1>Cours</h1>
+    <p>Decouvrez les cours disponibles.</p>
+  </header>
+
+  <div class="home-button-container">
+    <a href="index.html" class="home-btn">Retour a l'accueil</a>
+  </div>
+
+  <main class="container">
+    <section class="intro">
+      <h2>Liste des cours</h2>
+      <p class="muted">Les cours publies apparaissent ici.</p>
+      <ul id="course-list" class="course-list"></ul>
+      <p id="course-empty" class="muted hidden">Aucun cours publie.</p>
+      <div id="course-error" class="error-message hidden"></div>
+    </section>
+  </main>
+
+  <footer>
+    <p>Atelier pedagogique - aucune information n'est reellement envoyee.</p>
+  </footer>
+
+  <script>
+    const listEl = document.getElementById('course-list');
+    const emptyEl = document.getElementById('course-empty');
+    const errorEl = document.getElementById('course-error');
+
+    function escapeHtml(value) {
+      return String(value)
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#39;');
+    }
+
+    function escapeAttr(value) {
+      return escapeHtml(value).replace(/`/g, '&#96;');
+    }
+
+    function formatDate(isoDate) {
+      if (!isoDate) {
+        return '';
+      }
+      const parsed = new Date(isoDate);
+      if (Number.isNaN(parsed.getTime())) {
+        return '';
+      }
+      return parsed.toLocaleDateString('fr-FR', {
+        year: 'numeric',
+        month: 'long',
+        day: 'numeric'
+      });
+    }
+
+    function showError(message) {
+      errorEl.textContent = message;
+      errorEl.classList.remove('hidden');
+    }
+
+    function showEmpty() {
+      emptyEl.classList.remove('hidden');
+    }
+
+    async function loadCourses() {
+      try {
+        const response = await fetch('/api/courses');
+        if (!response.ok) {
+          throw new Error('Erreur de chargement');
+        }
+        const payload = await response.json();
+        const courses = Array.isArray(payload) ? payload : payload.courses;
+
+        if (!Array.isArray(courses) || courses.length === 0) {
+          showEmpty();
+          return;
+        }
+
+        listEl.innerHTML = courses.map((course) => {
+          const slug = escapeAttr(course.slug || '');
+          const title = escapeHtml(course.title || 'Cours');
+          const description = escapeHtml(course.description || '');
+          const updatedAt = formatDate(course.updated_at);
+          const updatedLine = updatedAt ? `<p class="muted">Mise a jour : ${escapeHtml(updatedAt)}</p>` : '';
+
+          return `
+            <li class="course-item">
+              <h3><a href="cours-view.html?slug=${slug}">${title}</a></h3>
+              ${description ? `<p>${description}</p>` : ''}
+              ${updatedLine}
+            </li>
+          `;
+        }).join('');
+      } catch (error) {
+        showError('Impossible de charger les cours pour le moment.');
+      }
+    }
+
+    loadCourses();
+  </script>
+</body>
+</html>

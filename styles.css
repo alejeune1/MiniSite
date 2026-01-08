@@ -227,6 +227,65 @@ main {
 }
 
 /* ===========================
+   Cours
+   =========================== */
+.container {
+  max-width: 1000px;
+  margin: 25px auto 40px;
+  padding: 0 15px;
+}
+
+.course-list {
+  list-style: none;
+  padding: 0;
+  margin: 10px 0 0;
+  display: grid;
+  gap: 12px;
+}
+
+.course-item {
+  background: #ffffff;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 16px;
+}
+
+.course-item h3 {
+  margin: 0 0 6px;
+  color: var(--blue-dark);
+}
+
+.course-item p {
+  margin: 0 0 8px;
+  line-height: 1.4;
+}
+
+.block {
+  margin: 14px 0;
+  padding: 12px;
+  border-radius: 8px;
+  border: 1px solid var(--border);
+  background: #ffffff;
+}
+
+.block-image img {
+  width: 100%;
+  height: auto;
+  border-radius: 6px;
+  display: block;
+}
+
+.block-links ul {
+  margin: 8px 0 0;
+  padding-left: 18px;
+}
+
+.muted {
+  color: #666666;
+  font-size: 0.95rem;
+}
+
+/* ===========================
    Boutique (achat.html)
    =========================== */
 .product-list {

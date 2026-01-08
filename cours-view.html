@@ -1,0 +1,170 @@
+﻿<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <title>Cours</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <header>
+    <h1>Fiche cours</h1>
+    <p>Contenu detaille du cours.</p>
+  </header>
+
+  <div class="home-button-container">
+    <a href="index.html" class="home-btn">Retour a l'accueil</a>
+  </div>
+
+  <main class="container">
+    <section class="intro">
+      <div id="course-header">
+        <h2>Chargement...</h2>
+      </div>
+      <div id="course-meta" class="muted"></div>
+      <div id="course-blocks"></div>
+      <p id="course-empty" class="muted hidden">Aucun contenu pour ce cours.</p>
+      <div id="course-error" class="error-message hidden"></div>
+    </section>
+  </main>
+
+  <footer>
+    <p>Atelier pedagogique - aucune information n'est reellement envoyee.</p>
+  </footer>
+
+  <script>
+    const headerEl = document.getElementById('course-header');
+    const metaEl = document.getElementById('course-meta');
+    const blocksEl = document.getElementById('course-blocks');
+    const emptyEl = document.getElementById('course-empty');
+    const errorEl = document.getElementById('course-error');
+
+    function escapeHtml(value) {
+      return String(value)
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#39;');
+    }
+
+    function escapeAttr(value) {
+      return escapeHtml(value).replace(/`/g, '&#96;');
+    }
+
+    function showError(message) {
+      errorEl.textContent = message;
+      errorEl.classList.remove('hidden');
+    }
+
+    function formatDate(isoDate) {
+      if (!isoDate) {
+        return '';
+      }
+      const parsed = new Date(isoDate);
+      if (Number.isNaN(parsed.getTime())) {
+        return '';
+      }
+      return parsed.toLocaleDateString('fr-FR', {
+        year: 'numeric',
+        month: 'long',
+        day: 'numeric'
+      });
+    }
+
+    function renderBlocks(blocks) {
+      if (!Array.isArray(blocks) || blocks.length === 0) {
+        emptyEl.classList.remove('hidden');
+        return;
+      }
+
+      blocksEl.innerHTML = blocks.map((block) => {
+        const type = block.type;
+        const content = block.content || {};
+
+        if (type === 'text') {
+          return `
+            <div class="block block-text">
+              ${content.html || ''}
+            </div>
+          `;
+        }
+
+        if (type === 'image') {
+          const url = content.url ? escapeAttr(content.url) : '';
+          const caption = content.caption ? escapeHtml(content.caption) : '';
+          return `
+            <figure class="block block-image">
+              ${url ? `<img src="${url}" alt="${caption}">` : ''}
+              ${caption ? `<figcaption class="muted">${caption}</figcaption>` : ''}
+            </figure>
+          `;
+        }
+
+        if (type === 'links') {
+          const items = Array.isArray(content.items) ? content.items : [];
+          const list = items.map((item) => {
+            const label = escapeHtml(item.label || item.url || 'Lien');
+            const url = escapeAttr(item.url || '#');
+            return `<li><a href="${url}" target="_blank" rel="noopener">${label}</a></li>`;
+          }).join('');
+
+          return `
+            <div class="block block-links">
+              <ul>
+                ${list}
+              </ul>
+            </div>
+          `;
+        }
+
+        return '';
+      }).join('');
+    }
+
+    async function loadCourse() {
+      const params = new URLSearchParams(window.location.search);
+      const slug = params.get('slug');
+
+      if (!slug) {
+        headerEl.innerHTML = '<h2>Cours introuvable</h2>';
+        showError('Aucun identifiant de cours fourni.');
+        return;
+      }
+
+      try {
+        const response = await fetch(`/api/courses/${encodeURIComponent(slug)}`);
+        if (response.status === 404) {
+          headerEl.innerHTML = '<h2>Cours introuvable</h2>';
+          showError('Ce cours est introuvable.');
+          return;
+        }
+        if (!response.ok) {
+          throw new Error('Erreur de chargement');
+        }
+
+        const payload = await response.json();
+        const course = payload.course || {};
+        const blocks = payload.blocks || [];
+
+        const title = escapeHtml(course.title || 'Cours');
+        const description = escapeHtml(course.description || '');
+        const updatedAt = formatDate(course.updated_at);
+
+        headerEl.innerHTML = `<h2>${title}</h2>`;
+        metaEl.textContent = updatedAt ? `Mise a jour : ${updatedAt}` : '';
+
+        if (description) {
+          blocksEl.insertAdjacentHTML('beforebegin', `<p>${description}</p>`);
+        }
+
+        renderBlocks(blocks);
+      } catch (error) {
+        headerEl.innerHTML = '<h2>Erreur</h2>';
+        showError('Impossible de charger ce cours pour le moment.');
+      }
+    }
+
+    loadCourse();
+  </script>
+</body>
+</html>
