@@ -1,6 +1,12 @@
 ﻿const SUPABASE_URL = "https://yvuhqyhufyskldhqqmjp.supabase.co";
 const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inl2dWhxeWh1Znlza2xkaHFxbWpwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Njc4NTM3ODMsImV4cCI6MjA4MzQyOTc4M30.lQ9TfaQsLvnO1B7N8u0a-NTj8GVYNchtrlC33idanz0";
 
+if (window.__ADMIN_APP_LOADED__) {
+  console.warn("admin.js déjà chargé, on stop.");
+  throw new Error("admin.js loaded twice");
+}
+window.__ADMIN_APP_LOADED__ = true;
+
 const loginSection = document.getElementById('login-section');
 const dashboard = document.getElementById('dashboard');
 const loginForm = document.getElementById('login-form');
