@@ -286,6 +286,89 @@ main {
 }
 
 /* ===========================
+   Admin
+   =========================== */
+.admin-grid {
+  display: grid;
+  gap: 16px;
+}
+
+@media (min-width: 900px) {
+  .admin-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+.admin-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.admin-actions {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  margin-top: 10px;
+}
+
+.small-btn {
+  padding: 8px 12px;
+  font-size: 0.95rem;
+}
+
+.danger-btn {
+  background: #cc3030;
+}
+
+.danger-btn:hover {
+  background: #a92727;
+}
+
+.block-item {
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 12px;
+  margin-bottom: 12px;
+  background: #ffffff;
+}
+
+.block-item-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.block-actions {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+
+.links-items {
+  display: grid;
+  gap: 8px;
+  margin-bottom: 10px;
+}
+
+.link-row {
+  display: grid;
+  gap: 8px;
+  grid-template-columns: 1fr 1fr auto;
+  align-items: center;
+}
+
+@media (max-width: 650px) {
+  .link-row {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* ===========================
    Boutique (achat.html)
    =========================== */
 .product-list {

@@ -1,0 +1,150 @@
+﻿<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <title>Admin - Cours</title>
+  <link rel="stylesheet" href="../styles.css">
+</head>
+<body>
+  <header>
+    <h1>Administration des cours</h1>
+    <p>Connexion reservee aux administrateurs.</p>
+  </header>
+
+  <div class="home-button-container">
+    <a href="../index.html" class="home-btn">Retour a l'accueil</a>
+  </div>
+
+  <main class="container">
+    <section class="intro" id="login-section">
+      <h2>Connexion admin</h2>
+      <form id="login-form">
+        <label for="login-email">Adresse email</label>
+        <input type="email" id="login-email" required>
+
+        <label for="login-password">Mot de passe</label>
+        <input type="password" id="login-password" required>
+
+        <button type="submit">Se connecter</button>
+      </form>
+      <div id="login-message" class="error-message hidden"></div>
+    </section>
+
+    <div id="dashboard" class="hidden">
+      <section class="intro">
+        <div class="admin-header">
+          <div>
+            <h2>Tableau de bord</h2>
+            <p class="muted">Connecte en tant que <span id="user-email">-</span></p>
+          </div>
+          <button id="logout-btn" type="button">Se deconnecter</button>
+        </div>
+        <div id="app-message" class="success-message hidden"></div>
+        <div id="app-error" class="error-message hidden"></div>
+      </section>
+
+      <div class="admin-grid">
+        <section class="modules admin-section">
+          <h3>Cours</h3>
+          <ul id="course-list" class="course-list"></ul>
+          <p id="course-empty" class="muted hidden">Aucun cours.</p>
+        </section>
+
+        <section class="modules admin-section">
+          <h3>Creer un cours</h3>
+          <form id="course-create-form">
+            <label for="course-title">Titre</label>
+            <input type="text" id="course-title" required>
+
+            <label for="course-description">Description</label>
+            <textarea id="course-description" rows="3"></textarea>
+
+            <label for="course-slug">Slug</label>
+            <input type="text" id="course-slug" required>
+
+            <label for="course-status">Statut</label>
+            <select id="course-status">
+              <option value="draft">Draft</option>
+              <option value="published">Published</option>
+            </select>
+
+            <button type="submit">Creer le cours</button>
+          </form>
+        </section>
+      </div>
+
+      <section id="course-editor" class="intro hidden">
+        <h3>Edition du cours</h3>
+        <p id="course-selected" class="muted">Selectionnez un cours.</p>
+        <form id="course-edit-form">
+          <label for="edit-title">Titre</label>
+          <input type="text" id="edit-title" required>
+
+          <label for="edit-description">Description</label>
+          <textarea id="edit-description" rows="3"></textarea>
+
+          <label for="edit-slug">Slug</label>
+          <input type="text" id="edit-slug" required>
+
+          <label for="edit-status">Statut</label>
+          <select id="edit-status">
+            <option value="draft">Draft</option>
+            <option value="published">Published</option>
+          </select>
+
+          <div class="admin-actions">
+            <button type="submit">Enregistrer</button>
+            <button type="button" id="course-delete-btn" class="danger-btn">Supprimer</button>
+          </div>
+        </form>
+      </section>
+
+      <section id="block-manager" class="modules hidden">
+        <h3>Blocs</h3>
+        <div id="block-list"></div>
+        <p id="block-empty" class="muted hidden">Aucun bloc.</p>
+
+        <div class="admin-grid">
+          <section class="admin-section">
+            <h4>Ajouter un bloc texte</h4>
+            <form id="block-text-form">
+              <label for="block-text-html">HTML</label>
+              <textarea id="block-text-html" rows="4" required></textarea>
+              <button type="submit">Ajouter le bloc texte</button>
+            </form>
+          </section>
+
+          <section class="admin-section">
+            <h4>Ajouter un bloc image</h4>
+            <form id="block-image-form">
+              <label for="block-image-url">URL de l'image</label>
+              <input type="text" id="block-image-url" required>
+
+              <label for="block-image-caption">Legende</label>
+              <input type="text" id="block-image-caption">
+
+              <button type="submit">Ajouter le bloc image</button>
+            </form>
+          </section>
+        </div>
+
+        <section class="admin-section">
+          <h4>Ajouter un bloc liens</h4>
+          <form id="block-links-form">
+            <div id="links-items" class="links-items"></div>
+            <button type="button" id="add-link-item" class="small-btn">Ajouter un lien</button>
+            <button type="submit">Ajouter le bloc liens</button>
+          </form>
+        </section>
+      </section>
+    </div>
+  </main>
+
+  <footer>
+    <p>Acces reserve a l'administration.</p>
+  </footer>
+
+  <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
+  <script src="admin.js"></script>
+</body>
+</html>
