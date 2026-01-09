@@ -20,6 +20,7 @@
       <h2>Liste des cours</h2>
       <p class="muted">Les cours publies apparaissent ici.</p>
       <ul id="course-list" class="course-list"></ul>
+      <p id="course-loading" class="muted hidden">Chargement...</p>
       <p id="course-empty" class="muted hidden">Aucun cours publie.</p>
       <div id="course-error" class="error-message hidden"></div>
     </section>
@@ -31,8 +32,12 @@
 
   <script>
     const listEl = document.getElementById('course-list');
+    const loadingEl = document.getElementById('course-loading');
     const emptyEl = document.getElementById('course-empty');
     const errorEl = document.getElementById('course-error');
+    const LIST_CACHE_KEY = 'courses-list-cache-v1';
+    const COURSE_CACHE_PREFIX = 'course-prefetch-v1:';
+    const prefetchCache = new Map();
 
     function escapeHtml(value) {
       return String(value)
@@ -71,7 +76,155 @@
       emptyEl.classList.remove('hidden');
     }
 
+    function clearStates() {
+      errorEl.classList.add('hidden');
+      emptyEl.classList.add('hidden');
+    }
+
+    function showLoading(message) {
+      loadingEl.textContent = message;
+      loadingEl.classList.remove('hidden');
+    }
+
+    function hideLoading() {
+      loadingEl.classList.add('hidden');
+    }
+
+    function renderSkeleton() {
+      listEl.innerHTML = `
+        <li class="course-item skeleton-card">
+          <div class="skeleton-line skeleton-title"></div>
+          <div class="skeleton-line"></div>
+          <div class="skeleton-line skeleton-short"></div>
+        </li>
+        <li class="course-item skeleton-card">
+          <div class="skeleton-line skeleton-title"></div>
+          <div class="skeleton-line"></div>
+          <div class="skeleton-line skeleton-short"></div>
+        </li>
+        <li class="course-item skeleton-card">
+          <div class="skeleton-line skeleton-title"></div>
+          <div class="skeleton-line"></div>
+          <div class="skeleton-line skeleton-short"></div>
+        </li>
+      `;
+    }
+
+    function readListCache() {
+      try {
+        const raw = sessionStorage.getItem(LIST_CACHE_KEY);
+        if (!raw) {
+          return null;
+        }
+        const payload = JSON.parse(raw);
+        if (!payload || !Array.isArray(payload.courses)) {
+          return null;
+        }
+        return payload;
+      } catch (error) {
+        return null;
+      }
+    }
+
+    function storeListCache(courses) {
+      try {
+        sessionStorage.setItem(LIST_CACHE_KEY, JSON.stringify({
+          ts: Date.now(),
+          courses
+        }));
+      } catch (error) {
+        /* ignore storage errors */
+      }
+    }
+
+    async function prefetchCourse(slug) {
+      if (!slug || prefetchCache.has(slug)) {
+        return;
+      }
+
+      const request = fetch(`/api/courses/${encodeURIComponent(slug)}`)
+        .then((response) => (response.ok ? response.json() : null))
+        .catch(() => null);
+
+      prefetchCache.set(slug, request);
+
+      const payload = await request;
+      if (!payload) {
+        prefetchCache.delete(slug);
+        return;
+      }
+
+      prefetchCache.set(slug, payload);
+      try {
+        sessionStorage.setItem(`${COURSE_CACHE_PREFIX}${slug}`, JSON.stringify({
+          ts: Date.now(),
+          payload
+        }));
+      } catch (error) {
+        /* ignore storage errors */
+      }
+    }
+
+    function attachPrefetchHandlers() {
+      const links = listEl.querySelectorAll('a[data-slug]');
+      links.forEach((link) => {
+        const slug = link.dataset.slug;
+        link.addEventListener('mouseenter', () => prefetchCourse(slug));
+        link.addEventListener('focus', () => prefetchCourse(slug));
+      });
+    }
+
+    listEl.addEventListener('click', (event) => {
+      const link = event.target.closest('a[data-slug]');
+      if (!link) {
+        return;
+      }
+
+      const slug = link.dataset.slug;
+      const cached = prefetchCache.get(slug);
+      if (cached && typeof cached.then !== 'function') {
+        try {
+          sessionStorage.setItem(`${COURSE_CACHE_PREFIX}${slug}`, JSON.stringify({
+            ts: Date.now(),
+            payload: cached
+          }));
+        } catch (error) {
+          /* ignore storage errors */
+        }
+      }
+    });
+
+    function renderCourses(courses) {
+      listEl.innerHTML = courses.map((course) => {
+        const slug = escapeAttr(course.slug || '');
+        const title = escapeHtml(course.title || 'Cours');
+        const description = escapeHtml(course.description || '');
+        const updatedAt = formatDate(course.updated_at);
+        const updatedLine = updatedAt ? `<p class="muted">Mise a jour : ${escapeHtml(updatedAt)}</p>` : '';
+
+        return `
+          <li class="course-item">
+            <h3><a href="cours-view.html?slug=${slug}" data-slug="${slug}">${title}</a></h3>
+            ${description ? `<p>${description}</p>` : ''}
+            ${updatedLine}
+          </li>
+        `;
+      }).join('');
+
+      attachPrefetchHandlers();
+    }
+
     async function loadCourses() {
+      clearStates();
+      const cached = readListCache();
+      if (cached) {
+        renderCourses(cached.courses);
+        showLoading('Actualisation...');
+      } else {
+        renderSkeleton();
+        showLoading('Chargement...');
+      }
+
       try {
         const response = await fetch('/api/courses');
         if (!response.ok) {
@@ -81,27 +234,20 @@
         const courses = Array.isArray(payload) ? payload : payload.courses;
 
         if (!Array.isArray(courses) || courses.length === 0) {
+          listEl.innerHTML = '';
           showEmpty();
+          hideLoading();
           return;
         }
 
-        listEl.innerHTML = courses.map((course) => {
-          const slug = escapeAttr(course.slug || '');
-          const title = escapeHtml(course.title || 'Cours');
-          const description = escapeHtml(course.description || '');
-          const updatedAt = formatDate(course.updated_at);
-          const updatedLine = updatedAt ? `<p class="muted">Mise a jour : ${escapeHtml(updatedAt)}</p>` : '';
-
-          return `
-            <li class="course-item">
-              <h3><a href="cours-view.html?slug=${slug}">${title}</a></h3>
-              ${description ? `<p>${description}</p>` : ''}
-              ${updatedLine}
-            </li>
-          `;
-        }).join('');
+        renderCourses(courses);
+        storeListCache(courses);
+        hideLoading();
       } catch (error) {
-        showError('Impossible de charger les cours pour le moment.');
+        hideLoading();
+        if (!cached) {
+          showError('Impossible de charger les cours pour le moment.');
+        }
       }
     }
 

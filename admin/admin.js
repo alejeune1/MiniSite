@@ -20,6 +20,7 @@ const appError = document.getElementById('app-error');
 
 const courseList = document.getElementById('course-list');
 const courseEmpty = document.getElementById('course-empty');
+const courseLoading = document.getElementById('course-loading');
 const courseCreateForm = document.getElementById('course-create-form');
 const courseTitle = document.getElementById('course-title');
 const courseDescription = document.getElementById('course-description');
@@ -50,6 +51,9 @@ const addLinkItemBtn = document.getElementById('add-link-item');
 let currentCourse = null;
 let currentBlocks = [];
 let coursesById = new Map();
+let coursesCache = [];
+
+const COURSES_CACHE_KEY = 'admin-courses-cache-v1';
 
 const supaClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
@@ -123,6 +127,105 @@ function formatDate(isoDate) {
     month: 'long',
     day: 'numeric'
   });
+}
+
+function showCourseLoading(message) {
+  courseLoading.textContent = message;
+  courseLoading.classList.remove('hidden');
+}
+
+function hideCourseLoading() {
+  courseLoading.classList.add('hidden');
+}
+
+function clearCourseStates() {
+  courseEmpty.classList.add('hidden');
+  hideCourseLoading();
+}
+
+function renderCourseSkeleton() {
+  courseList.innerHTML = `
+    <li class="course-item skeleton-card">
+      <div class="skeleton-line skeleton-title"></div>
+      <div class="skeleton-line"></div>
+      <div class="skeleton-line skeleton-short"></div>
+    </li>
+    <li class="course-item skeleton-card">
+      <div class="skeleton-line skeleton-title"></div>
+      <div class="skeleton-line"></div>
+      <div class="skeleton-line skeleton-short"></div>
+    </li>
+  `;
+}
+
+function readCoursesCache() {
+  try {
+    const raw = sessionStorage.getItem(COURSES_CACHE_KEY);
+    if (!raw) {
+      return null;
+    }
+    const payload = JSON.parse(raw);
+    if (!payload || !Array.isArray(payload.courses)) {
+      return null;
+    }
+    return payload;
+  } catch (error) {
+    return null;
+  }
+}
+
+function storeCoursesCache(courses) {
+  try {
+    sessionStorage.setItem(COURSES_CACHE_KEY, JSON.stringify({
+      ts: Date.now(),
+      courses
+    }));
+  } catch (error) {
+    /* ignore storage errors */
+  }
+}
+
+function sortCourses(courses) {
+  return [...courses].sort((a, b) => {
+    const timeA = a?.updated_at ? new Date(a.updated_at).getTime() : 0;
+    const timeB = b?.updated_at ? new Date(b.updated_at).getTime() : 0;
+    if (timeA !== timeB) {
+      return timeB - timeA;
+    }
+    const titleA = (a?.title || a?.slug || '').toLowerCase();
+    const titleB = (b?.title || b?.slug || '').toLowerCase();
+    return titleA.localeCompare(titleB);
+  });
+}
+
+function setCoursesCache(courses) {
+  coursesCache = Array.isArray(courses) ? sortCourses(courses) : [];
+  renderCourses(coursesCache);
+  storeCoursesCache(coursesCache);
+}
+
+function upsertCourse(course) {
+  if (!course) {
+    return;
+  }
+  const list = Array.isArray(coursesCache) ? [...coursesCache] : [];
+  const index = list.findIndex((item) => item.id === course.id);
+  if (index >= 0) {
+    list[index] = { ...list[index], ...course };
+  } else {
+    list.unshift(course);
+  }
+  setCoursesCache(list);
+}
+
+function removeCourseFromCache(courseId) {
+  if (!courseId) {
+    return;
+  }
+  const list = Array.isArray(coursesCache)
+    ? coursesCache.filter((course) => course.id !== courseId)
+    : [];
+  setCoursesCache(list);
 }
 
 function isConfigReady() {
@@ -310,6 +413,16 @@ function renderCourses(courses) {
 
 async function loadCourses(selectedId) {
   clearAppMessages();
+  clearCourseStates();
+
+  const cached = readCoursesCache();
+  if (cached) {
+    setCoursesCache(cached.courses);
+    showCourseLoading('Actualisation...');
+  } else {
+    renderCourseSkeleton();
+    showCourseLoading('Chargement...');
+  }
 
   const { data, error } = await supaClient
     .from('courses')
@@ -317,12 +430,16 @@ async function loadCourses(selectedId) {
     .order('updated_at', { ascending: false });
 
   if (error) {
-    showAppError(error.message || 'Erreur lors du chargement des cours.');
+    hideCourseLoading();
+    if (!cached) {
+      showAppError(error.message || 'Erreur lors du chargement des cours.');
+    }
     return;
   }
 
   const courses = data || [];
-  renderCourses(courses);
+  setCoursesCache(courses);
+  hideCourseLoading();
 
   if (!courses.length) {
     resetCourseEditor();
@@ -364,7 +481,10 @@ async function createCourse(event) {
 
   courseCreateForm.reset();
   showAppMessage('Cours cree.');
-  await loadCourses(data.id);
+  upsertCourse(data);
+  setCourseEditor(data);
+  currentBlocks = [];
+  renderBlocks();
 }
 
 async function updateCourse(event) {
@@ -396,7 +516,8 @@ async function updateCourse(event) {
   }
 
   showAppMessage('Cours mis a jour.');
-  await loadCourses(data.id);
+  upsertCourse(data);
+  setCourseEditor(data);
 }
 
 async function deleteCourse() {
@@ -422,9 +543,10 @@ async function deleteCourse() {
     return;
   }
 
+  const deletedId = currentCourse.id;
   showAppMessage('Cours supprime.');
   resetCourseEditor();
-  await loadCourses();
+  removeCourseFromCache(deletedId);
 }
 
 function getNextBlockOrder() {

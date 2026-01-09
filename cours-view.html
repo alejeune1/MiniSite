@@ -17,11 +17,19 @@
 
   <main class="container">
     <section class="intro">
-      <div id="course-header">
-        <h2>Chargement...</h2>
+      <div id="course-loader" class="course-loader">
+        <div class="skeleton-line skeleton-title"></div>
+        <div class="skeleton-line"></div>
+        <div class="skeleton-line skeleton-short"></div>
+        <div class="skeleton-block"></div>
+        <div class="skeleton-block"></div>
       </div>
-      <div id="course-meta" class="muted"></div>
-      <div id="course-blocks"></div>
+      <div id="course-content" class="course-content hidden">
+        <div id="course-header"></div>
+        <p id="course-description" class="hidden"></p>
+        <div id="course-meta" class="muted"></div>
+        <div id="course-blocks"></div>
+      </div>
       <p id="course-empty" class="muted hidden">Aucun contenu pour ce cours.</p>
       <div id="course-error" class="error-message hidden"></div>
     </section>
@@ -33,10 +41,14 @@
 
   <script>
     const headerEl = document.getElementById('course-header');
+    const descriptionEl = document.getElementById('course-description');
     const metaEl = document.getElementById('course-meta');
     const blocksEl = document.getElementById('course-blocks');
+    const loaderEl = document.getElementById('course-loader');
+    const contentEl = document.getElementById('course-content');
     const emptyEl = document.getElementById('course-empty');
     const errorEl = document.getElementById('course-error');
+    const COURSE_CACHE_PREFIX = 'course-prefetch-v1:';
 
     function escapeHtml(value) {
       return String(value)
@@ -56,6 +68,12 @@
       errorEl.classList.remove('hidden');
     }
 
+    function clearStates() {
+      errorEl.classList.add('hidden');
+      emptyEl.classList.add('hidden');
+      descriptionEl.classList.add('hidden');
+    }
+
     function formatDate(isoDate) {
       if (!isoDate) {
         return '';
@@ -72,6 +90,7 @@
     }
 
     function renderBlocks(blocks) {
+      blocksEl.innerHTML = '';
       if (!Array.isArray(blocks) || blocks.length === 0) {
         emptyEl.classList.remove('hidden');
         return;
@@ -121,6 +140,69 @@
       }).join('');
     }
 
+    function showLoader() {
+      loaderEl.classList.remove('hidden');
+      contentEl.classList.add('hidden');
+      contentEl.classList.remove('is-visible');
+    }
+
+    function showContent() {
+      loaderEl.classList.add('hidden');
+      contentEl.classList.remove('hidden');
+      requestAnimationFrame(() => {
+        contentEl.classList.add('is-visible');
+      });
+    }
+
+    function readCourseCache(slug) {
+      try {
+        const raw = sessionStorage.getItem(`${COURSE_CACHE_PREFIX}${slug}`);
+        if (!raw) {
+          return null;
+        }
+        const cached = JSON.parse(raw);
+        if (!cached || !cached.payload) {
+          return null;
+        }
+        return cached.payload;
+      } catch (error) {
+        return null;
+      }
+    }
+
+    function storeCourseCache(slug, payload) {
+      try {
+        sessionStorage.setItem(`${COURSE_CACHE_PREFIX}${slug}`, JSON.stringify({
+          ts: Date.now(),
+          payload
+        }));
+      } catch (error) {
+        /* ignore storage errors */
+      }
+    }
+
+    function renderCourse(payload) {
+      const course = payload.course || {};
+      const blocks = payload.blocks || [];
+
+      const title = escapeHtml(course.title || 'Cours');
+      const description = escapeHtml(course.description || '');
+      const updatedAt = formatDate(course.updated_at);
+
+      headerEl.innerHTML = `<h2>${title}</h2>`;
+      metaEl.textContent = updatedAt ? `Mise a jour : ${updatedAt}` : '';
+
+      if (description) {
+        descriptionEl.textContent = description;
+        descriptionEl.classList.remove('hidden');
+      } else {
+        descriptionEl.textContent = '';
+        descriptionEl.classList.add('hidden');
+      }
+
+      renderBlocks(blocks);
+    }
+
     async function loadCourse() {
       const params = new URLSearchParams(window.location.search);
       const slug = params.get('slug');
@@ -131,11 +213,21 @@
         return;
       }
 
+      clearStates();
+      showLoader();
+      const cached = readCourseCache(slug);
+      if (cached) {
+        renderCourse(cached);
+        showContent();
+        return;
+      }
+
       try {
         const response = await fetch(`/api/courses/${encodeURIComponent(slug)}`);
         if (response.status === 404) {
           headerEl.innerHTML = '<h2>Cours introuvable</h2>';
           showError('Ce cours est introuvable.');
+          showContent();
           return;
         }
         if (!response.ok) {
@@ -143,24 +235,13 @@
         }
 
         const payload = await response.json();
-        const course = payload.course || {};
-        const blocks = payload.blocks || [];
-
-        const title = escapeHtml(course.title || 'Cours');
-        const description = escapeHtml(course.description || '');
-        const updatedAt = formatDate(course.updated_at);
-
-        headerEl.innerHTML = `<h2>${title}</h2>`;
-        metaEl.textContent = updatedAt ? `Mise a jour : ${updatedAt}` : '';
-
-        if (description) {
-          blocksEl.insertAdjacentHTML('beforebegin', `<p>${description}</p>`);
-        }
-
-        renderBlocks(blocks);
+        renderCourse(payload);
+        storeCourseCache(slug, payload);
+        showContent();
       } catch (error) {
         headerEl.innerHTML = '<h2>Erreur</h2>';
         showError('Impossible de charger ce cours pour le moment.');
+        showContent();
       }
     }
 
