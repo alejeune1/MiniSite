@@ -1,11 +1,11 @@
-﻿const SUPABASE_URL = "https://yvuhqyhufyskldhqqmjp.supabase.co";
-const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inl2dWhxeWh1Znlza2xkaHFxbWpwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Njc4NTM3ODMsImV4cCI6MjA4MzQyOTc4M30.lQ9TfaQsLvnO1B7N8u0a-NTj8GVYNchtrlC33idanz0";
+(() => {
+  if (window.__ADMIN_LOADED__) return;
+  window.__ADMIN_LOADED__ = true;
 
-if (window.__ADMIN_APP_LOADED__) {
-  console.warn("admin.js déjà chargé, on stop.");
-  throw new Error("admin.js loaded twice");
-}
-window.__ADMIN_APP_LOADED__ = true;
+  console.log("admin.js charg\u00e9");
+
+const SUPABASE_URL = "https://yvuhqyhufyskldhqqmjp.supabase.co";
+const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inl2dWhxeWh1Znlza2xkaHFxbWpwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Njc4NTM3ODMsImV4cCI6MjA4MzQyOTc4M30.lQ9TfaQsLvnO1B7N8u0a-NTj8GVYNchtrlC33idanz0";
 
 const loginSection = document.getElementById('login-section');
 const dashboard = document.getElementById('dashboard');
@@ -51,7 +51,7 @@ let currentCourse = null;
 let currentBlocks = [];
 let coursesById = new Map();
 
-const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+const supaClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
 function escapeHtml(value) {
   return String(value)
@@ -263,7 +263,7 @@ async function loadBlocks() {
     return;
   }
 
-  const { data, error } = await supabase
+  const { data, error } = await supaClient
     .from('course_blocks')
     .select('id,course_id,type,content,order')
     .eq('course_id', currentCourse.id)
@@ -311,7 +311,7 @@ function renderCourses(courses) {
 async function loadCourses(selectedId) {
   clearAppMessages();
 
-  const { data, error } = await supabase
+  const { data, error } = await supaClient
     .from('courses')
     .select('id,slug,title,description,status,updated_at')
     .order('updated_at', { ascending: false });
@@ -351,7 +351,7 @@ async function createCourse(event) {
     status: courseStatus.value
   };
 
-  const { data, error } = await supabase
+  const { data, error } = await supaClient
     .from('courses')
     .insert(payload)
     .select()
@@ -383,7 +383,7 @@ async function updateCourse(event) {
     status: editStatus.value
   };
 
-  const { data, error } = await supabase
+  const { data, error } = await supaClient
     .from('courses')
     .update(updates)
     .eq('id', currentCourse.id)
@@ -412,7 +412,7 @@ async function deleteCourse() {
     return;
   }
 
-  const { error } = await supabase
+  const { error } = await supaClient
     .from('courses')
     .delete()
     .eq('id', currentCourse.id);
@@ -454,7 +454,7 @@ async function addTextBlock(event) {
     order: getNextBlockOrder()
   };
 
-  const { error } = await supabase
+  const { error } = await supaClient
     .from('course_blocks')
     .insert(payload);
 
@@ -486,7 +486,7 @@ async function addImageBlock(event) {
     order: getNextBlockOrder()
   };
 
-  const { error } = await supabase
+  const { error } = await supaClient
     .from('course_blocks')
     .insert(payload);
 
@@ -527,7 +527,7 @@ async function addLinksBlock(event) {
     order: getNextBlockOrder()
   };
 
-  const { error } = await supabase
+  const { error } = await supaClient
     .from('course_blocks')
     .insert(payload);
 
@@ -561,7 +561,7 @@ async function saveBlock(blockElement) {
     content = { items };
   }
 
-  const { error } = await supabase
+  const { error } = await supaClient
     .from('course_blocks')
     .update({ content })
     .eq('id', blockId);
@@ -582,7 +582,7 @@ async function deleteBlock(blockElement) {
     return;
   }
 
-  const { error } = await supabase
+  const { error } = await supaClient
     .from('course_blocks')
     .delete()
     .eq('id', blockId);
@@ -611,7 +611,7 @@ async function reorderBlock(index, direction) {
   const currentOrder = typeof current.order === 'number' ? current.order : index;
   const targetOrder = typeof target.order === 'number' ? target.order : targetIndex;
 
-  const { error: errorA } = await supabase
+  const { error: errorA } = await supaClient
     .from('course_blocks')
     .update({ order: targetOrder })
     .eq('id', current.id);
@@ -621,7 +621,7 @@ async function reorderBlock(index, direction) {
     return;
   }
 
-  const { error: errorB } = await supabase
+  const { error: errorB } = await supaClient
     .from('course_blocks')
     .update({ order: currentOrder })
     .eq('id', target.id);
@@ -719,54 +719,59 @@ async function updateUI(session) {
   }
 }
 
-loginForm.addEventListener('submit', async (event) => {
-  event.preventDefault();
-  clearLoginMessage();
+document.addEventListener('DOMContentLoaded', () => {
+  loginForm.addEventListener('submit', async (event) => {
+    event.preventDefault();
+    console.log("submit login d\u00e9tect\u00e9");
+    clearLoginMessage();
 
-  if (!isConfigReady()) {
-    showLoginError('Configurez SUPABASE_URL et SUPABASE_ANON_KEY dans admin/admin.js.');
-    return;
-  }
+    if (!isConfigReady()) {
+      showLoginError('Configurez SUPABASE_URL et SUPABASE_ANON_KEY dans admin/admin.js.');
+      return;
+    }
 
-  const email = loginEmail.value.trim();
-  const password = loginPassword.value;
+    const email = loginEmail.value.trim();
+    const password = loginPassword.value;
 
-  const { error } = await supabase.auth.signInWithPassword({ email, password });
-  if (error) {
-    showLoginError(error.message || 'Connexion impossible.');
-    return;
-  }
+    const { error } = await supaClient.auth.signInWithPassword({ email, password });
+    if (error) {
+      showLoginError(error.message || 'Connexion impossible.');
+      return;
+    }
 
-  loginForm.reset();
+    loginForm.reset();
+  });
+
+  logoutBtn.addEventListener('click', async () => {
+    clearAppMessages();
+    await supaClient.auth.signOut();
+  });
+
+  courseCreateForm.addEventListener('submit', createCourse);
+  courseEditForm.addEventListener('submit', updateCourse);
+  courseDeleteBtn.addEventListener('click', deleteCourse);
+  blockTextForm.addEventListener('submit', addTextBlock);
+  blockImageForm.addEventListener('submit', addImageBlock);
+  blockLinksForm.addEventListener('submit', addLinksBlock);
+  courseList.addEventListener('click', handleCourseListClick);
+  blockList.addEventListener('click', handleBlockListClick);
+  addLinkItemBtn.addEventListener('click', () => addLinkRow(linksItems, '', ''));
+
+  supaClient.auth.onAuthStateChange((event, session) => {
+    console.log("auth state change", session);
+    updateUI(session);
+  });
+
+  (async () => {
+    if (!isConfigReady()) {
+      showLoginError('Configurez SUPABASE_URL et SUPABASE_ANON_KEY dans admin/admin.js.');
+      lockLoginForm();
+      return;
+    }
+
+    resetLinksForm();
+    const { data } = await supaClient.auth.getSession();
+    updateUI(data.session);
+  })();
 });
-
-logoutBtn.addEventListener('click', async () => {
-  clearAppMessages();
-  await supabase.auth.signOut();
-});
-
-courseCreateForm.addEventListener('submit', createCourse);
-courseEditForm.addEventListener('submit', updateCourse);
-courseDeleteBtn.addEventListener('click', deleteCourse);
-blockTextForm.addEventListener('submit', addTextBlock);
-blockImageForm.addEventListener('submit', addImageBlock);
-blockLinksForm.addEventListener('submit', addLinksBlock);
-courseList.addEventListener('click', handleCourseListClick);
-blockList.addEventListener('click', handleBlockListClick);
-addLinkItemBtn.addEventListener('click', () => addLinkRow(linksItems, '', ''));
-
-supabase.auth.onAuthStateChange((event, session) => {
-  updateUI(session);
-});
-
-(async () => {
-  if (!isConfigReady()) {
-    showLoginError('Configurez SUPABASE_URL et SUPABASE_ANON_KEY dans admin/admin.js.');
-    lockLoginForm();
-    return;
-  }
-
-  resetLinksForm();
-  const { data } = await supabase.auth.getSession();
-  updateUI(data.session);
 })();
