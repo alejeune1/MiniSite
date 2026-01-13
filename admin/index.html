@@ -74,70 +74,79 @@
         </section>
       </div>
 
-      <section id="course-editor" class="intro hidden">
-        <h3>Edition du cours</h3>
-        <p id="course-selected" class="muted">Selectionnez un cours.</p>
-        <form id="course-edit-form">
-          <label for="edit-title">Titre</label>
-          <input type="text" id="edit-title" required>
-
-          <label for="edit-description">Description</label>
-          <textarea id="edit-description" rows="3"></textarea>
-
-          <label for="edit-slug">Slug</label>
-          <input type="text" id="edit-slug" required>
-
-          <label for="edit-status">Statut</label>
-          <select id="edit-status">
-            <option value="draft">Draft</option>
-            <option value="published">Published</option>
-          </select>
-
-          <div class="admin-actions">
-            <button type="submit">Enregistrer</button>
-            <button type="button" id="course-delete-btn" class="danger-btn">Supprimer</button>
+      <div id="course-modal" class="modal-overlay hidden" aria-hidden="true">
+        <div class="modal" role="dialog" aria-modal="true" aria-labelledby="course-modal-title">
+          <div class="modal-header">
+            <h3 id="course-modal-title">Edition du cours</h3>
+            <button type="button" class="modal-close" id="course-modal-close" aria-label="Fermer">X</button>
           </div>
-        </form>
-      </section>
+          <div class="modal-content">
+            <section id="course-editor" class="intro hidden">
+              <p id="course-selected" class="muted">Selectionnez un cours.</p>
+              <form id="course-edit-form">
+                <label for="edit-title">Titre</label>
+                <input type="text" id="edit-title" required>
 
-      <section id="block-manager" class="modules hidden">
-        <h3>Blocs</h3>
-        <div id="block-list"></div>
-        <p id="block-empty" class="muted hidden">Aucun bloc.</p>
+                <label for="edit-description">Description</label>
+                <textarea id="edit-description" rows="3"></textarea>
 
-        <div class="admin-grid">
-          <section class="admin-section">
-            <h4>Ajouter un bloc texte</h4>
-            <form id="block-text-form">
-              <label for="block-text-html">HTML</label>
-              <textarea id="block-text-html" rows="4" required></textarea>
-              <button type="submit">Ajouter le bloc texte</button>
-            </form>
-          </section>
+                <label for="edit-slug">Slug</label>
+                <input type="text" id="edit-slug" required>
 
-          <section class="admin-section">
-            <h4>Ajouter un bloc image</h4>
-            <form id="block-image-form">
-              <label for="block-image-url">URL de l'image</label>
-              <input type="text" id="block-image-url" required>
+                <label for="edit-status">Statut</label>
+                <select id="edit-status">
+                  <option value="draft">Draft</option>
+                  <option value="published">Published</option>
+                </select>
 
-              <label for="block-image-caption">Legende</label>
-              <input type="text" id="block-image-caption">
+                <div class="admin-actions">
+                  <button type="submit">Enregistrer</button>
+                  <button type="button" id="course-delete-btn" class="danger-btn">Supprimer</button>
+                </div>
+              </form>
+            </section>
 
-              <button type="submit">Ajouter le bloc image</button>
-            </form>
-          </section>
+            <section id="block-manager" class="modules hidden">
+              <h3>Blocs</h3>
+              <div id="block-list"></div>
+              <p id="block-empty" class="muted hidden">Aucun bloc.</p>
+
+              <div class="admin-grid">
+                <section class="admin-section">
+                  <h4>Ajouter un bloc texte</h4>
+                  <form id="block-text-form">
+                    <label for="block-text-html">HTML</label>
+                    <textarea id="block-text-html" rows="4" required></textarea>
+                    <button type="submit">Ajouter le bloc texte</button>
+                  </form>
+                </section>
+
+                <section class="admin-section">
+                  <h4>Ajouter un bloc image</h4>
+                  <form id="block-image-form">
+                    <label for="block-image-url">URL de l'image</label>
+                    <input type="text" id="block-image-url" required>
+
+                    <label for="block-image-caption">Legende</label>
+                    <input type="text" id="block-image-caption">
+
+                    <button type="submit">Ajouter le bloc image</button>
+                  </form>
+                </section>
+              </div>
+
+              <section class="admin-section">
+                <h4>Ajouter un bloc liens</h4>
+                <form id="block-links-form">
+                  <div id="links-items" class="links-items"></div>
+                  <button type="button" id="add-link-item" class="small-btn">Ajouter un lien</button>
+                  <button type="submit">Ajouter le bloc liens</button>
+                </form>
+              </section>
+            </section>
+          </div>
         </div>
-
-        <section class="admin-section">
-          <h4>Ajouter un bloc liens</h4>
-          <form id="block-links-form">
-            <div id="links-items" class="links-items"></div>
-            <button type="button" id="add-link-item" class="small-btn">Ajouter un lien</button>
-            <button type="submit">Ajouter le bloc liens</button>
-          </form>
-        </section>
-      </section>
+      </div>
     </div>
   </main>
 

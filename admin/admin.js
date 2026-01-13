@@ -35,6 +35,8 @@ const editDescription = document.getElementById('edit-description');
 const editSlug = document.getElementById('edit-slug');
 const editStatus = document.getElementById('edit-status');
 const courseDeleteBtn = document.getElementById('course-delete-btn');
+const courseModalOverlay = document.getElementById('course-modal');
+const courseModalClose = document.getElementById('course-modal-close');
 
 const blockManager = document.getElementById('block-manager');
 const blockList = document.getElementById('block-list');
@@ -52,6 +54,8 @@ let currentCourse = null;
 let currentBlocks = [];
 let coursesById = new Map();
 let coursesCache = [];
+let lastModalTrigger = null;
+let modalCloseTimer = null;
 
 const COURSES_CACHE_KEY = 'admin-courses-cache-v1';
 
@@ -238,8 +242,13 @@ function lockLoginForm() {
   loginForm.querySelector('button[type="submit"]').disabled = true;
 }
 
+function isModalOpen() {
+  return courseModalOverlay && courseModalOverlay.classList.contains('is-visible');
+}
+
 function resetCourseEditor() {
   currentCourse = null;
+  currentBlocks = [];
   courseSelected.textContent = 'Selectionnez un cours.';
   courseEditForm.reset();
   showElement(courseEditor, false);
@@ -257,6 +266,68 @@ function setCourseEditor(course) {
   editStatus.value = course.status || 'draft';
   showElement(courseEditor, true);
   showElement(blockManager, true);
+}
+
+function openCourseModal(courseId, triggerElement) {
+  if (!courseModalOverlay) {
+    return;
+  }
+
+  const course = coursesById.get(courseId);
+  if (!course) {
+    showAppError('Cours introuvable.');
+    return;
+  }
+
+  lastModalTrigger = triggerElement || document.activeElement;
+  if (modalCloseTimer) {
+    window.clearTimeout(modalCloseTimer);
+    modalCloseTimer = null;
+  }
+
+  setCourseEditor(course);
+  currentBlocks = [];
+  renderBlocks();
+
+  showElement(courseModalOverlay, true);
+  courseModalOverlay.setAttribute('aria-hidden', 'false');
+
+  if (!isModalOpen()) {
+    requestAnimationFrame(() => {
+      courseModalOverlay.classList.add('is-visible');
+    });
+  }
+
+  document.body.classList.add('modal-open');
+  loadBlocks();
+
+  requestAnimationFrame(() => {
+    editTitle.focus();
+  });
+}
+
+function closeCourseModal() {
+  if (!courseModalOverlay || !isModalOpen()) {
+    return;
+  }
+
+  courseModalOverlay.classList.remove('is-visible');
+  courseModalOverlay.setAttribute('aria-hidden', 'true');
+  document.body.classList.remove('modal-open');
+
+  const trigger = lastModalTrigger;
+  lastModalTrigger = null;
+  if (trigger && document.contains(trigger)) {
+    trigger.focus();
+  }
+
+  if (modalCloseTimer) {
+    window.clearTimeout(modalCloseTimer);
+  }
+  modalCloseTimer = window.setTimeout(() => {
+    showElement(courseModalOverlay, false);
+    resetCourseEditor();
+  }, 200);
 }
 
 function createLinkRowHtml(label = '', url = '') {
@@ -482,9 +553,7 @@ async function createCourse(event) {
   courseCreateForm.reset();
   showAppMessage('Cours cree.');
   upsertCourse(data);
-  setCourseEditor(data);
-  currentBlocks = [];
-  renderBlocks();
+  openCourseModal(data.id);
 }
 
 async function updateCourse(event) {
@@ -545,8 +614,8 @@ async function deleteCourse() {
 
   const deletedId = currentCourse.id;
   showAppMessage('Cours supprime.');
-  resetCourseEditor();
   removeCourseFromCache(deletedId);
+  closeCourseModal();
 }
 
 function getNextBlockOrder() {
@@ -823,8 +892,8 @@ function handleCourseListClick(event) {
   }
 
   clearAppMessages();
-  setCourseEditor(coursesById.get(courseId));
-  loadBlocks();
+  const trigger = event.target.closest('button') || event.target;
+  openCourseModal(courseId, trigger);
 }
 
 async function updateUI(session) {
@@ -837,6 +906,7 @@ async function updateUI(session) {
   } else {
     showElement(loginSection, true);
     showElement(dashboard, false);
+    closeCourseModal();
     resetCourseEditor();
   }
 }
@@ -878,6 +948,24 @@ document.addEventListener('DOMContentLoaded', () => {
   courseList.addEventListener('click', handleCourseListClick);
   blockList.addEventListener('click', handleBlockListClick);
   addLinkItemBtn.addEventListener('click', () => addLinkRow(linksItems, '', ''));
+
+  if (courseModalOverlay) {
+    courseModalOverlay.addEventListener('click', (event) => {
+      if (event.target === courseModalOverlay) {
+        closeCourseModal();
+      }
+    });
+  }
+
+  if (courseModalClose) {
+    courseModalClose.addEventListener('click', closeCourseModal);
+  }
+
+  document.addEventListener('keydown', (event) => {
+    if (event.key === 'Escape' && isModalOpen()) {
+      closeCourseModal();
+    }
+  });
 
   supaClient.auth.onAuthStateChange((event, session) => {
     console.log("auth state change", session);
