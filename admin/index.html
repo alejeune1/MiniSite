@@ -80,7 +80,7 @@
             <h3 id="course-modal-title">Edition du cours</h3>
             <button type="button" class="modal-close" id="course-modal-close" aria-label="Fermer">X</button>
           </div>
-          <div class="modal-content">
+          <div class="modal-body">
             <section id="course-editor" class="intro hidden">
               <p id="course-selected" class="muted">Selectionnez un cours.</p>
               <form id="course-edit-form">
@@ -109,6 +109,7 @@
             <section id="block-manager" class="modules hidden">
               <h3>Blocs</h3>
               <div id="block-list"></div>
+              <p id="block-loading" class="muted hidden">Chargement des blocs...</p>
               <p id="block-empty" class="muted hidden">Aucun bloc.</p>
 
               <div class="admin-grid">
@@ -124,13 +125,16 @@
                 <section class="admin-section">
                   <h4>Ajouter un bloc image</h4>
                   <form id="block-image-form">
-                    <label for="block-image-url">URL de l'image</label>
-                    <input type="text" id="block-image-url" required>
+                    <label for="block-image-file">Image</label>
+                    <input type="file" id="block-image-file" accept="image/*" required>
+                    <div id="block-image-preview" class="image-preview hidden">
+                      <img id="block-image-preview-img" alt="Apercu de l'image">
+                    </div>
 
                     <label for="block-image-caption">Legende</label>
                     <input type="text" id="block-image-caption">
 
-                    <button type="submit">Ajouter le bloc image</button>
+                    <button type="submit">Uploader & Ajouter</button>
                   </form>
                 </section>
               </div>

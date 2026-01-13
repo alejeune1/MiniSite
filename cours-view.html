@@ -48,7 +48,12 @@
     const contentEl = document.getElementById('course-content');
     const emptyEl = document.getElementById('course-empty');
     const errorEl = document.getElementById('course-error');
-    const COURSE_CACHE_PREFIX = 'course-prefetch-v1:';
+    const COURSE_CACHE_PREFIX = 'courses:detail:';
+    const COURSE_CACHE_SUFFIX = ':v1';
+
+    function getCourseCacheKey(slug) {
+      return `${COURSE_CACHE_PREFIX}${slug}${COURSE_CACHE_SUFFIX}`;
+    }
 
     function escapeHtml(value) {
       return String(value)
@@ -156,7 +161,7 @@
 
     function readCourseCache(slug) {
       try {
-        const raw = sessionStorage.getItem(`${COURSE_CACHE_PREFIX}${slug}`);
+        const raw = sessionStorage.getItem(getCourseCacheKey(slug));
         if (!raw) {
           return null;
         }
@@ -172,7 +177,7 @@
 
     function storeCourseCache(slug, payload) {
       try {
-        sessionStorage.setItem(`${COURSE_CACHE_PREFIX}${slug}`, JSON.stringify({
+        sessionStorage.setItem(getCourseCacheKey(slug), JSON.stringify({
           ts: Date.now(),
           payload
         }));
@@ -203,6 +208,39 @@
       renderBlocks(blocks);
     }
 
+    async function fetchCourse(slug, isBackground) {
+      try {
+        const response = await fetch(`/api/courses/${encodeURIComponent(slug)}`);
+        if (response.status === 404) {
+          if (!isBackground) {
+            headerEl.innerHTML = '<h2>Cours introuvable</h2>';
+            showError('Ce cours est introuvable.');
+            showContent();
+          }
+          return null;
+        }
+        if (!response.ok) {
+          throw new Error('Erreur de chargement');
+        }
+
+        const payload = await response.json();
+        const shouldReveal = contentEl.classList.contains('hidden');
+        renderCourse(payload);
+        storeCourseCache(slug, payload);
+        if (shouldReveal) {
+          showContent();
+        }
+        return payload;
+      } catch (error) {
+        if (!isBackground) {
+          headerEl.innerHTML = '<h2>Erreur</h2>';
+          showError('Impossible de charger ce cours pour le moment.');
+          showContent();
+        }
+        return null;
+      }
+    }
+
     async function loadCourse() {
       const params = new URLSearchParams(window.location.search);
       const slug = params.get('slug');
@@ -214,35 +252,16 @@
       }
 
       clearStates();
-      showLoader();
       const cached = readCourseCache(slug);
       if (cached) {
         renderCourse(cached);
         showContent();
+        fetchCourse(slug, true);
         return;
       }
 
-      try {
-        const response = await fetch(`/api/courses/${encodeURIComponent(slug)}`);
-        if (response.status === 404) {
-          headerEl.innerHTML = '<h2>Cours introuvable</h2>';
-          showError('Ce cours est introuvable.');
-          showContent();
-          return;
-        }
-        if (!response.ok) {
-          throw new Error('Erreur de chargement');
-        }
-
-        const payload = await response.json();
-        renderCourse(payload);
-        storeCourseCache(slug, payload);
-        showContent();
-      } catch (error) {
-        headerEl.innerHTML = '<h2>Erreur</h2>';
-        showError('Impossible de charger ce cours pour le moment.');
-        showContent();
-      }
+      showLoader();
+      await fetchCourse(slug, false);
     }
 
     loadCourse();

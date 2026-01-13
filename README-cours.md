@@ -71,11 +71,17 @@ create policy "public_read_published_course_blocks"
   );
 ```
 
-## Storage (images)
+## Storage (images publiques)
 
 - Creer un bucket Storage nomme `course-assets`.
-- Laisser le bucket en mode public OFF.
-- Stocker dans `course_blocks.content.url` une URL exploitable cote client (ex: URL signee generee depuis l'admin ou un endpoint prive).
+- Passer le bucket en mode public ON (pour des URLs stables).
+- Les images sont uploadees dans `course-assets/courses/{courseId}/{timestamp}-{random}.{ext}`.
+- Stocker dans `course_blocks.content.url` l'URL publique retournee par `getPublicUrl()`.
+
+### Policies Storage (upload admin seulement)
+
+Appliquer des policies Storage pour limiter l'upload aux admins (fonction `public.is_admin()`).
+Vous pouvez utiliser le fichier `supabase-storage-policies.sql`.
 
 ## Exemple d'insertion
 

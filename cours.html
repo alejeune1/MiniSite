@@ -35,9 +35,14 @@
     const loadingEl = document.getElementById('course-loading');
     const emptyEl = document.getElementById('course-empty');
     const errorEl = document.getElementById('course-error');
-    const LIST_CACHE_KEY = 'courses-list-cache-v1';
-    const COURSE_CACHE_PREFIX = 'course-prefetch-v1:';
+    const LIST_CACHE_KEY = 'courses:list:v1';
+    const COURSE_CACHE_PREFIX = 'courses:detail:';
+    const COURSE_CACHE_SUFFIX = ':v1';
     const prefetchCache = new Map();
+
+    function getCourseCacheKey(slug) {
+      return `${COURSE_CACHE_PREFIX}${slug}${COURSE_CACHE_SUFFIX}`;
+    }
 
     function escapeHtml(value) {
       return String(value)
@@ -156,7 +161,7 @@
 
       prefetchCache.set(slug, payload);
       try {
-        sessionStorage.setItem(`${COURSE_CACHE_PREFIX}${slug}`, JSON.stringify({
+        sessionStorage.setItem(getCourseCacheKey(slug), JSON.stringify({
           ts: Date.now(),
           payload
         }));
@@ -184,10 +189,10 @@
       const cached = prefetchCache.get(slug);
       if (cached && typeof cached.then !== 'function') {
         try {
-          sessionStorage.setItem(`${COURSE_CACHE_PREFIX}${slug}`, JSON.stringify({
-            ts: Date.now(),
-            payload: cached
-          }));
+        sessionStorage.setItem(getCourseCacheKey(slug), JSON.stringify({
+          ts: Date.now(),
+          payload: cached
+        }));
         } catch (error) {
           /* ignore storage errors */
         }

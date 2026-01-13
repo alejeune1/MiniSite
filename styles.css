@@ -429,6 +429,7 @@ main {
   color: var(--blue-dark);
 }
 
+.modal-body,
 .modal-content {
   padding: 18px 20px 20px;
   overflow-y: auto;
@@ -469,6 +470,7 @@ body.modal-open {
     max-height: 92vh;
   }
 
+  .modal-body,
   .modal-content {
     padding: 14px;
   }
@@ -526,6 +528,23 @@ body.modal-open {
   gap: 8px;
   grid-template-columns: 1fr 1fr auto;
   align-items: center;
+}
+
+.image-preview {
+  margin: 10px 0 6px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 8px;
+  background: #fafafa;
+}
+
+.image-preview img {
+  display: block;
+  width: 100%;
+  height: auto;
+  border-radius: 6px;
+  max-height: 260px;
+  object-fit: cover;
 }
 
 @media (max-width: 650px) {

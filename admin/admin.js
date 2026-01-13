@@ -40,11 +40,14 @@ const courseModalClose = document.getElementById('course-modal-close');
 
 const blockManager = document.getElementById('block-manager');
 const blockList = document.getElementById('block-list');
+const blockLoading = document.getElementById('block-loading');
 const blockEmpty = document.getElementById('block-empty');
 const blockTextForm = document.getElementById('block-text-form');
 const blockTextHtml = document.getElementById('block-text-html');
 const blockImageForm = document.getElementById('block-image-form');
-const blockImageUrl = document.getElementById('block-image-url');
+const blockImageFile = document.getElementById('block-image-file');
+const blockImagePreview = document.getElementById('block-image-preview');
+const blockImagePreviewImg = document.getElementById('block-image-preview-img');
 const blockImageCaption = document.getElementById('block-image-caption');
 const blockLinksForm = document.getElementById('block-links-form');
 const linksItems = document.getElementById('links-items');
@@ -56,8 +59,9 @@ let coursesById = new Map();
 let coursesCache = [];
 let lastModalTrigger = null;
 let modalCloseTimer = null;
+let imagePreviewUrl = null;
 
-const COURSES_CACHE_KEY = 'admin-courses-cache-v1';
+const COURSES_CACHE_KEY = 'admin:courses:list:v1';
 
 const supaClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
@@ -140,6 +144,21 @@ function showCourseLoading(message) {
 
 function hideCourseLoading() {
   courseLoading.classList.add('hidden');
+}
+
+function showBlockLoading(message) {
+  if (!blockLoading) {
+    return;
+  }
+  blockLoading.textContent = message;
+  blockLoading.classList.remove('hidden');
+}
+
+function hideBlockLoading() {
+  if (!blockLoading) {
+    return;
+  }
+  blockLoading.classList.add('hidden');
 }
 
 function clearCourseStates() {
@@ -251,10 +270,15 @@ function resetCourseEditor() {
   currentBlocks = [];
   courseSelected.textContent = 'Selectionnez un cours.';
   courseEditForm.reset();
+  blockTextForm.reset();
+  blockImageForm.reset();
+  resetLinksForm();
   showElement(courseEditor, false);
   showElement(blockManager, false);
   blockList.innerHTML = '';
+  hideBlockLoading();
   blockEmpty.classList.add('hidden');
+  clearImagePreview();
 }
 
 function setCourseEditor(course) {
@@ -266,6 +290,33 @@ function setCourseEditor(course) {
   editStatus.value = course.status || 'draft';
   showElement(courseEditor, true);
   showElement(blockManager, true);
+}
+
+function clearImagePreview() {
+  if (imagePreviewUrl) {
+    URL.revokeObjectURL(imagePreviewUrl);
+    imagePreviewUrl = null;
+  }
+  if (blockImagePreviewImg) {
+    blockImagePreviewImg.src = '';
+  }
+  if (blockImagePreview) {
+    blockImagePreview.classList.add('hidden');
+  }
+}
+
+function setImagePreview(file) {
+  clearImagePreview();
+  if (!file) {
+    return;
+  }
+  imagePreviewUrl = URL.createObjectURL(file);
+  if (blockImagePreviewImg) {
+    blockImagePreviewImg.src = imagePreviewUrl;
+  }
+  if (blockImagePreview) {
+    blockImagePreview.classList.remove('hidden');
+  }
 }
 
 function openCourseModal(courseId, triggerElement) {
@@ -286,8 +337,14 @@ function openCourseModal(courseId, triggerElement) {
   }
 
   setCourseEditor(course);
+  blockTextForm.reset();
+  blockImageForm.reset();
+  resetLinksForm();
+  clearImagePreview();
   currentBlocks = [];
   renderBlocks();
+  blockEmpty.classList.add('hidden');
+  showBlockLoading('Chargement des blocs...');
 
   showElement(courseModalOverlay, true);
   courseModalOverlay.setAttribute('aria-hidden', 'false');
@@ -437,6 +494,9 @@ async function loadBlocks() {
     return;
   }
 
+  showBlockLoading('Chargement des blocs...');
+  blockEmpty.classList.add('hidden');
+
   const { data, error } = await supaClient
     .from('course_blocks')
     .select('id,course_id,type,content,order')
@@ -444,11 +504,13 @@ async function loadBlocks() {
     .order('order', { ascending: true });
 
   if (error) {
+    hideBlockLoading();
     showAppError(error.message || 'Erreur lors du chargement des blocs.');
     return;
   }
 
   currentBlocks = data || [];
+  hideBlockLoading();
   renderBlocks();
 }
 
@@ -659,6 +721,61 @@ async function addTextBlock(event) {
   await loadBlocks();
 }
 
+function createRandomId() {
+  if (window.crypto && window.crypto.getRandomValues) {
+    const bytes = new Uint8Array(8);
+    window.crypto.getRandomValues(bytes);
+    return Array.from(bytes, (byte) => byte.toString(16).padStart(2, '0')).join('');
+  }
+  return Math.random().toString(16).slice(2, 10);
+}
+
+function getFileExtension(file) {
+  const name = (file?.name || '').trim();
+  if (name.includes('.')) {
+    return name.split('.').pop().toLowerCase();
+  }
+  const type = file?.type || '';
+  if (type.startsWith('image/')) {
+    const ext = type.split('/')[1];
+    if (ext === 'jpeg') {
+      return 'jpg';
+    }
+    return ext;
+  }
+  return '';
+}
+
+function buildStoragePath(courseId, file) {
+  const extension = getFileExtension(file);
+  const suffix = extension ? `.${extension}` : '';
+  return `courses/${courseId}/${Date.now()}-${createRandomId()}${suffix}`;
+}
+
+async function uploadImageFile(file, courseId) {
+  const path = buildStoragePath(courseId, file);
+  const { error } = await supaClient
+    .storage
+    .from('course-assets')
+    .upload(path, file, {
+      contentType: file.type || undefined,
+      upsert: false
+    });
+
+  if (error) {
+    showAppError(formatWriteError(error));
+    return null;
+  }
+
+  const { data } = supaClient.storage.from('course-assets').getPublicUrl(path);
+  if (!data?.publicUrl) {
+    showAppError('Impossible de recuperer l\'URL publique.');
+    return null;
+  }
+
+  return data.publicUrl;
+}
+
 async function addImageBlock(event) {
   event.preventDefault();
   clearAppMessages();
@@ -668,8 +785,29 @@ async function addImageBlock(event) {
     return;
   }
 
-  const url = blockImageUrl.value.trim();
+  const file = blockImageFile.files[0];
+  if (!file) {
+    showAppError('Selectionnez une image a uploader.');
+    return;
+  }
+  if (!file.type.startsWith('image/')) {
+    showAppError('Le fichier doit etre une image.');
+    return;
+  }
+
+  const submitBtn = blockImageForm.querySelector('button[type="submit"]');
+  submitBtn.disabled = true;
+  const originalLabel = submitBtn.textContent;
+  submitBtn.textContent = 'Upload en cours...';
+
   const caption = blockImageCaption.value.trim();
+  const url = await uploadImageFile(file, currentCourse.id);
+  if (!url) {
+    submitBtn.disabled = false;
+    submitBtn.textContent = originalLabel;
+    return;
+  }
+
   const payload = {
     course_id: currentCourse.id,
     type: 'image',
@@ -683,10 +821,15 @@ async function addImageBlock(event) {
 
   if (error) {
     showAppError(formatWriteError(error));
+    submitBtn.disabled = false;
+    submitBtn.textContent = originalLabel;
     return;
   }
 
   blockImageForm.reset();
+  clearImagePreview();
+  submitBtn.disabled = false;
+  submitBtn.textContent = originalLabel;
   showAppMessage('Bloc image ajoute.');
   await loadBlocks();
 }
@@ -948,6 +1091,11 @@ document.addEventListener('DOMContentLoaded', () => {
   courseList.addEventListener('click', handleCourseListClick);
   blockList.addEventListener('click', handleBlockListClick);
   addLinkItemBtn.addEventListener('click', () => addLinkRow(linksItems, '', ''));
+  if (blockImageFile) {
+    blockImageFile.addEventListener('change', (event) => {
+      setImagePreview(event.target.files[0]);
+    });
+  }
 
   if (courseModalOverlay) {
     courseModalOverlay.addEventListener('click', (event) => {

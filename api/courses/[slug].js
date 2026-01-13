@@ -60,6 +60,7 @@
     }
 
     const blocks = await blocksResponse.json();
+    res.setHeader('Cache-Control', 's-maxage=60, stale-while-revalidate=300');
     return res.status(200).json({ course, blocks });
   } catch (error) {
     return res.status(500).json({ error: 'Unexpected server error' });
