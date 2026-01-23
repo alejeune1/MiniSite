@@ -115,11 +115,16 @@ function formatWriteError(error) {
   if (!error) {
     return 'Erreur inconnue.';
   }
-  const message = (error.message || '').toLowerCase();
-  if (message.includes('permission') || message.includes('rls') || error.code === '42501') {
-    return 'Action refusee. Votre compte ne semble pas admin.';
+  const rawMessage = error.message || 'Action impossible.';
+  const message = rawMessage.toLowerCase();
+  const code = error.code ? ` (code: ${error.code})` : '';
+  if (message.includes('no api key found')) {
+    return `Erreur: ${rawMessage}${code}`;
   }
-  return `Erreur: ${error.message || 'Action impossible.'}`;
+  if (message.includes('permission') || message.includes('rls') || error.code === '42501') {
+    return `Action refusee. Votre compte ne semble pas admin. Details: ${rawMessage}${code}`;
+  }
+  return `Erreur: ${rawMessage}${code}`;
 }
 
 function formatDate(isoDate) {
