@@ -1,0 +1,150 @@
+<!doctype html>
+<html lang="fr">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="theme-color" content="#0d4b4a" />
+    <title>Mwono — Apprendre le shimaoré</title>
+    <meta
+      name="description"
+      content="Un traducteur pédagogique français–shimaoré pour apprendre les mots et expressions de Mayotte."
+    />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Manrope:wght@400;500;600;700;800&family=Playfair+Display:wght@700;800&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <div class="grain" aria-hidden="true"></div>
+    <header class="site-header">
+      <a class="brand" href="#top" aria-label="Mwono, accueil">
+        <span class="brand-mark"><span></span><span></span><span></span></span>
+        <span>Mwono</span>
+      </a>
+      <nav class="main-nav" aria-label="Navigation principale">
+        <a class="active" href="#traducteur">Traduire</a>
+        <a href="#expressions">Expressions</a>
+        <a href="#revision">Réviser</a>
+      </nav>
+      <button class="streak-pill" type="button" id="streakButton" title="Votre série d'apprentissage">
+        <span class="flame">✦</span>
+        <span><strong id="streakCount">3</strong> jours</span>
+      </button>
+    </header>
+
+    <main id="top">
+      <section class="hero wrap">
+        <div class="hero-copy">
+          <div class="eyebrow"><span class="eyebrow-dot"></span> <span id="languageEyebrow">Shimaoré · Mayotte</span></div>
+          <h1>Parler un peu,<br /><em>beaucoup mieux.</em></h1>
+          <p class="hero-intro">
+            Trouvez les mots justes, écoutez leur son et retenez les phrases qui font la différence.
+          </p>
+          <div class="hero-note">
+            <span class="note-icon">↗</span>
+            <span>Une langue vivante, des variantes selon les familles et les villages.</span>
+          </div>
+        </div>
+        <div class="hero-figure flag-figure" aria-label="Drapeau de Mayotte">
+          <div class="flag-shadow" aria-hidden="true"></div>
+          <div class="mayotte-flag">
+            <div class="flag-title">MAYOTTE</div>
+            <img src="Coat_of_Arms_of_Mayotte.svg" alt="Blason officiel de Mayotte" />
+          </div>
+          <span class="figure-label">DRAPEAU DE MAYOTTE</span>
+          <span class="figure-coordinate">RA HACHIRI · NOUS SOMMES VIGILANTS</span>
+        </div>
+      </section>
+
+      <section class="translator-section wrap" id="traducteur">
+        <div class="section-kicker">01 <span></span> Le traducteur</div>
+        <div class="translator-card">
+          <div class="language-bar">
+            <div class="language-choice" id="sourceChoice"><span class="lang-dot french" id="sourceDot"></span><strong id="sourceLanguage">Français</strong><small id="sourceLanguageSub">français</small></div>
+            <button class="swap-button" id="swapButton" type="button" aria-label="Inverser les langues">⇄</button>
+            <div class="language-choice target-choice" id="targetChoice">
+              <button class="target-trigger" id="targetTrigger" type="button" aria-expanded="false" aria-controls="languageMenu"><span class="lang-dot shimaore" id="targetDot"></span><strong id="targetLanguage">Shimaoré</strong><small id="targetLanguageSub">shimaore</small><span class="chevron">⌄</span></button>
+              <div class="language-menu" id="languageMenu" role="menu">
+                <button type="button" role="menuitem" data-language="shimaore"><span class="lang-dot shimaore"></span>Shimaoré <small>Mayotte</small></button>
+                <button type="button" role="menuitem" data-language="breton"><span class="lang-dot breton"></span>Breton <small>Bretagne</small></button>
+              </div>
+            </div>
+          </div>
+          <div class="translator-body">
+            <div class="input-panel">
+              <label for="sourceText" id="inputLabel">Votre phrase</label>
+              <textarea id="sourceText" rows="4" maxlength="240" placeholder="Écrivez un mot ou une phrase…" spellcheck="true"></textarea>
+              <div class="input-footer">
+                <span id="characterCount">0 / 240</span>
+                <button class="clear-button" id="clearButton" type="button">Effacer</button>
+              </div>
+            </div>
+            <div class="result-panel" aria-live="polite">
+              <div class="result-heading"><span>Traduction proposée</span><span class="confidence" id="confidence"><i></i> Prêt à traduire</span></div>
+              <div class="result-main">
+                <p class="empty-result" id="resultText">Votre traduction apparaîtra ici.</p>
+                <button class="audio-button hidden" id="audioButton" type="button" aria-label="Écouter la traduction">◖<span>Écouter</span></button>
+              </div>
+              <div class="pronunciation hidden" id="pronunciationRow"><span>prononciation</span><strong id="pronunciationText"></strong></div>
+              <div class="result-tip" id="resultTip"><span>✦</span> Essayez « merci », « bonjour » ou « comment ça va ? »</div>
+            </div>
+          </div>
+          <div class="quick-prompts">
+            <span>Essayez :</span>
+            <div id="quickPromptButtons"></div>
+          </div>
+        </div>
+      </section>
+
+      <section class="basics-section wrap" id="expressions">
+        <div class="section-heading">
+          <div>
+            <div class="section-kicker">02 <span></span> <span id="essentialsLabel">Les essentiels</span></div>
+            <h2>Les premiers mots<br /><em>à garder en tête.</em></h2>
+          </div>
+          <div class="library-actions">
+            <label class="search-field" for="lexiconSearch"><span>⌕</span><input id="lexiconSearch" type="search" placeholder="Chercher un mot…" /></label>
+            <button class="text-link" type="button" id="showAllButton">Voir tout <span>↗</span></button>
+          </div>
+        </div>
+        <div class="word-grid" id="wordGrid"></div>
+      </section>
+
+      <section class="learn-section wrap" id="revision">
+        <div class="lesson-card">
+          <div class="lesson-topline"><span class="lesson-tag">Mini-leçon du jour</span><span class="lesson-number">03 <span>/ 07</span></span></div>
+          <h2 id="lessonTitle">Saluer avec<br /><em>respect.</em></h2>
+          <p id="lessonText">À Mayotte, le choix du salut dépend aussi de la personne à qui l’on parle.</p>
+          <div class="lesson-example">
+            <div><span class="lesson-label" id="lessonOneLabel">À un aîné</span><strong id="lessonOneWord">Kwezi</strong><small id="lessonOnePron">/ kwé-zi /</small></div>
+            <div class="lesson-divider"></div>
+            <div><span class="lesson-label" id="lessonTwoLabel">Entre proches</span><strong id="lessonTwoWord">Jeje</strong><small id="lessonTwoPron">/ jé-jé /</small></div>
+          </div>
+          <button class="lesson-button" type="button" id="lessonAudioButton"><span>◖</span> Écouter les deux</button>
+        </div>
+        <div class="quiz-card">
+          <div class="quiz-header"><span class="quiz-icon">?</span><div><span class="lesson-tag">Petit quiz</span><strong>On vérifie ?</strong></div></div>
+          <p id="quizQuestion">Comment dit-on <strong>« merci »</strong> en shimaoré&nbsp;?</p>
+          <div class="quiz-options" id="quizOptions"></div>
+          <div class="quiz-feedback" id="quizFeedback" aria-live="polite"></div>
+        </div>
+      </section>
+
+      <section class="bottom-note wrap">
+        <span class="bottom-star">✦</span>
+        <p>Le shimaoré s’écrit parfois de plusieurs façons. <strong>Écoutez les locuteurs</strong> et osez vous lancer.</p>
+        <span class="bottom-star">✦</span>
+      </section>
+    </main>
+
+    <footer class="site-footer wrap">
+      <span>Mwono · apprendre le shimaoré</span>
+      <span>Une première base, à enrichir avec les voix de Mayotte.</span>
+    </footer>
+    <script src="data.js"></script>
+    <script src="script.js"></script>
+  </body>
+</html>
